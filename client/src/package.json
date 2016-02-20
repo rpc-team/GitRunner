@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "beefy": "^2.1.5",
-    "phaser": "^2.4.6"
+    "phaser": "^2.4.6",
+    "rest-js": "^1.1.2"
   }
 }
