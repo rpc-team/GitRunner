@@ -124,7 +124,7 @@ module.exports = (function() {
             // enable a single and double jump.
             // doubleJumps are only allowed on a certain part of the initial jump arc
             if ( player.body.velocity.y > -100 && numJumps < 1 ) {
-                player.body.velocity.y = -350;
+                player.body.velocity.y = -250;
                 numJumps++;
             }
         }
