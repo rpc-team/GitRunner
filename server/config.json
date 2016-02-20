@@ -1,0 +1,13 @@
+{
+    "httpServer": {
+        "port": 7823
+    },
+    "github": {
+        "owner": "exist3nz",
+        "repository": "GitRunner",
+
+        "debug": true,
+        "protocol": "https",
+        "userAgent": "GitRunner Backend"
+    }
+}

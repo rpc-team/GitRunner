@@ -1,0 +1,23 @@
+{
+  "name": "gitrunner-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/exist3nz/GitRunner.git"
+  },
+  "author": "RPC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/exist3nz/GitRunner/issues"
+  },
+  "homepage": "https://github.com/exist3nz/GitRunner#readme",
+  "dependencies": {
+    "express": "^4.13.4",
+    "github": "^0.2.4"
+  }
+}
