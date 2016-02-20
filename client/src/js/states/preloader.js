@@ -17,7 +17,7 @@ module.exports = (function() {
             height: 32
         },
         dude: {
-            file: 'assets/peter_green.png',
+            file: 'assets/ricardo.png',
             width: 48,
             height: 64
         }

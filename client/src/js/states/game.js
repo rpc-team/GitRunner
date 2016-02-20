@@ -46,7 +46,7 @@ module.exports = (function() {
         var ground;
         for ( var i = 1; i <= level.size; i++ ) {
 
-            if ( i > 15 && level.gaps && (i == 4 || level.size % Math.floor(Math.random() * 100) == 0) ) {
+            if ( i > 15 && level.gaps && (i == Math.floor(level.size / level.gaps)) ) {
                 level.gaps--;
                 console.log('generating gap at position: ' + i);
                 i += 2;
@@ -89,7 +89,7 @@ module.exports = (function() {
         var isJumping = !player.body.touching.down;
         var runSpeed = 150;
 
-        runSpeed += 2 * (Math.abs(platforms.children[0].x) / 64)
+        runSpeed += Math.abs(platforms.children[0].x) / 64;
 
         platforms.forEach(function(ground, index) {
             ground.body.velocity.x = -runSpeed;
