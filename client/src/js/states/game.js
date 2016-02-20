@@ -15,6 +15,7 @@ module.exports = (function() {
     var level;
     var numJumps = 0;
     var serverLabel, gameOverLabel;
+    var deathEmitter;
 
     o.preload = function() {
         console.log('Game.preload');
@@ -75,6 +76,11 @@ module.exports = (function() {
         gameOverLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY, 'Game Over', {font: 'bold 96pt arial', fill: '#F00'});
         gameOverLabel.anchor.set(0.5);
         gameOverLabel.visible = false;
+
+        // emitter
+        deathEmitter = this.game.add.emitter(this.game.world.centerX, 0, 100);
+        deathEmitter.makeParticles('heart');
+        deathEmitter.gravity = 300;
     };
 
     o.update = function() {
@@ -146,6 +152,9 @@ module.exports = (function() {
     function killPlayer() {
         state = 'dead';
         updateRunnerSpeedTo(0);
+        deathEmitter.x = player.worldPosition.x + player.width/2;
+        deathEmitter.y = player.worldPosition.y + player.height/2;
+        deathEmitter.start(true, 2000, null, 15);
     }
 
     function getServerVersion(o) {

@@ -8,8 +8,8 @@ module.exports = (function() {
     var _images = {
         logo: 'assets/logo.png',
         sky: 'assets/sky.png',
-        diamond: 'assets/diamond.png'
-
+        diamond: 'assets/diamond.png',
+        heart: 'assets/heart.png'
     };
     var _spritesheets = {
         baddie: {
@@ -18,7 +18,7 @@ module.exports = (function() {
             height: 32
         },
         dude: {
-            file: 'assets/ricardo.png',
+            file: 'assets/criss.png',
             width: 48,
             height: 64
         }
