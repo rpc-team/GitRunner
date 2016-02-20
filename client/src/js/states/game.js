@@ -28,16 +28,13 @@ module.exports = (function() {
         }
 
         this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
-        //level = {
-        //    size: 1024,
-        //    gaps: 5
-        //}
     };
 
     o.create = function() {
         console.log('Game.create');
 
         level = this.game.cache.getJSON('level');
+        level.gaps *= 2;
         console.log(level);
         var serverVersion = this.game.cache.getJSON('server_version');
 
@@ -48,8 +45,7 @@ module.exports = (function() {
         platforms.enableBody = true;
         var ground;
         for ( var i = 1; i <= level.size; i++ ) {
-
-            if ( i > 15 && level.gaps && (i == 17 || i == Math.floor(level.size / level.gaps)) ) {
+            if ( level.gaps && (i == Math.floor(level.size / level.gaps)) ) {
                 level.gaps--;
                 console.log('generating gap at position: ' + i);
                 i += 2;
@@ -62,7 +58,7 @@ module.exports = (function() {
         }
 
         // create the player
-        player = this.game.add.sprite(128, 0, 'dude');
+        player = this.game.add.sprite(256, 0, 'dude');
         this.game.physics.arcade.enable(player);
         player.body.bounce.y = 0;
         player.body.gravity.y = 350;
@@ -113,11 +109,12 @@ module.exports = (function() {
         var isJumping = !player.body.touching.down;
         var runSpeed = 150;
 
-        //runSpeed += Math.abs(platforms.children[0].x) / 64;
+        runSpeed += Math.abs(platforms.children[0].x) / 64;
 
         updateRunnerSpeedTo(runSpeed);
 
-        if ( player.body.bottom >= settings.display.height ) {
+        if ( player.body.bottom >= settings.display.height ||
+             player.body.touching.right ) {
             // kill the player and end the game
             killPlayer();
         }
