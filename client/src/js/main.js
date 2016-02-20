@@ -17,11 +17,12 @@
                                settings.display.height,
                                Phaser.AUTO,
                                ''
-                               //{ preload: preload, create: create, update: update }
     );
 
     Game.state.add('boot', require('./states/boot'));
     Game.state.add('preloader', require('./states/preloader'));
+    Game.state.add('mainmenu', require('./states/mainmenu'));
+    Game.state.add('game', require('./states/game'));
 
     Game.state.start('boot');
 

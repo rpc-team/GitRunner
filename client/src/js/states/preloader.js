@@ -5,23 +5,47 @@
 module.exports = (function() {
     var settings = require('../../settings');
     var o = {};
-    var _logo;
+    var _images = {
+        logo: 'assets/logo.png',
+        sky: 'assets/sky.png',
+        diamond: 'assets/diamond.png'
+
+    };
+    var _spritesheets = {
+        baddie: {
+            file: 'assets/baddie.png',
+            width: 32,
+            height: 48
+        },
+        dude: {
+            file: 'assets/dude.png',
+            width: 32,
+            height: 48
+        }
+    };
+    var element;
 
     o.preload = function() {
         console.log('Preloader.preload');
 
-        this.load.image('logo', 'assets/logo.png');
+        // load images
+        for ( k in _images ) {
+            this.load.image(k, _images[k]);
+        }
+
+        // load the sprite sheets
+        for ( k in _spritesheets ) {
+            this.load.spritesheet(k, _spritesheets[k].file, _spritesheets[k].width, _spritesheets[k].height);
+        }
     };
 
     o.create = function() {
         console.log('Preloader.create');
-        _logo = this.game.add.sprite(this.scale.width/2, this.scale.height/2, 'logo');
-        _logo.anchor.set(0.5);
-    };
 
-    o.update = function() {
-        console.log('Preloader.update');
-        _logo.angle += 0.4;
+        element = this.game.add.sprite(this.scale.width/2, this.scale.height/2, 'logo');
+        element.anchor.set(0.5);
+
+        this.state.start('mainmenu');
     };
 
     return o;
