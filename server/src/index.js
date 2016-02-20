@@ -19,6 +19,8 @@ app.exposeEndpoints = function() {
     app.get('/version', handlers.version);
 
     app.get('/health', handlers.health);
+
+    app.get('/player/:playerId/level/:level?', handlers.level);
 };
 
 app.initGitHub = function() {
@@ -45,6 +47,13 @@ exports.boot = function(config) {
     app.locals.httpServer = config.httpServer;
     app.locals.github = config.github;
     app.locals.appVersion = config.appVersion;
+
+    // TODO: Used only for cross-origin, it should be removed
+    app.use(function(req, res, next) {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Headers', 'Content-Type');
+        next();
+    });
 
     app.exposeEndpoints();
     app.initGitHub();

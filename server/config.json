@@ -6,7 +6,7 @@
         "owner": "exist3nz",
         "repository": "GitRunner",
 
-        "debug": true,
+        "debug": false,
         "protocol": "https",
         "userAgent": "GitRunner Backend"
     }
