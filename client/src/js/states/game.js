@@ -45,12 +45,13 @@ module.exports = (function() {
         platforms.enableBody = true;
         var ground;
         for ( var i = 1; i <= level.size; i++ ) {
-            if ( level.gaps && (i == 4 || level.size % Math.floor(Math.random() * 100) == 0) ) {
+
+            if ( i > 15 && level.gaps && (i == 4 || level.size % Math.floor(Math.random() * 100) == 0) ) {
                 level.gaps--;
                 console.log('generating gap at position: ' + i);
                 i += 2;
             } else {
-                ground = platforms.create(i * 64, this.game.world.height-64, 'tile_grass');
+                ground = platforms.create((i-1) * 64, this.game.world.height-64, 'tile_grass');
                 ground.body.immovable = true;
                 ground.scale.set(0.5, 0.5);
                 ground.body.friction.x = 0;
@@ -86,10 +87,14 @@ module.exports = (function() {
     o.run = function() {
         var cursors = this.game.input.keyboard.createCursorKeys();
         var isJumping = !player.body.touching.down;
+        var runSpeed = 150;
 
-        platforms.forEach(function(ground) {
-            ground.body.velocity.x = -150;
+        runSpeed += 2 * (Math.abs(platforms.children[0].x) / 64)
+
+        platforms.forEach(function(ground, index) {
+            ground.body.velocity.x = -runSpeed;
         }, this);
+
 
         if ( cursors.up.isDown) {
             // enable a single and double jump.
