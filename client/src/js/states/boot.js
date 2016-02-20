@@ -24,12 +24,13 @@ module.exports = (function() {
         // start the physics system
         this.game.physics.startSystem(Phaser.Physics[settings.physicsEngine]);
 
-        // lets move along!
-        this.state.start('preloader');
-
         // generate the player ID
         settings.playerID = Math.floor(1 + Math.random() * 10);
         console.log("PlayerID = " + settings.playerID);
+
+        // lets move along!
+        this.state.start('preloader');
+
     };
 
     return o;

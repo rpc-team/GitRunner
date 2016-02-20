@@ -5,14 +5,6 @@
     console.log("GitRunner booting!");
     var settings = require('../settings');
 
-
-    //var states = {
-    //    boot: require('./states/boot'),
-    //    loader: require('./states/loader'),
-    //    mainmenu: require('./states/mainmenu'),
-    //    game: require('./states/game')
-    //};
-
     var Game = new Phaser.Game(settings.display.width,
                                settings.display.height,
                                Phaser.AUTO,
@@ -27,17 +19,3 @@
     Game.state.start('boot');
 
 })();
-
-/*
- var rest = require('rest-js');
-
- var restApi = rest('https://api.github.com/', {
- crossDomain: true
- });
-
- restApi.get('repositories', {
- format: null
- }, function(error, data) {
- console.log(data);
- });
- */

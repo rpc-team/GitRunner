@@ -3,7 +3,6 @@
  */
 
 module.exports = (function() {
-    var settings = require('../../settings');
     var o = {};
     var _images = {
         logo: 'assets/logo.png',
@@ -45,7 +44,7 @@ module.exports = (function() {
         element = this.game.add.sprite(this.scale.width/2, this.scale.height/2, 'logo');
         element.anchor.set(0.5);
 
-        this.state.start('game');
+        this.state.start('mainmenu');
     };
 
     return o;

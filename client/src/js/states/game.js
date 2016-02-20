@@ -14,8 +14,6 @@ module.exports = (function() {
     var platforms;
     var level;
 
-    var rest = require('rest-js');
-
     o.preload = function() {
         console.log('Game.preload');
 
@@ -46,12 +44,14 @@ module.exports = (function() {
         platforms.enableBody = true;
         var ground;
         for ( var i = 1; i <= level.size; i++ ) {
-            if ( i == 4 || level.size % Math.floor(Math.random() * 100) == 0 ) {
+            if ( level.gaps && (i == 4 || level.size % Math.floor(Math.random() * 100) == 0) ) {
+                level.gaps--;
                 console.log('generating gap at position: ' + i);
                 i += 2;
             } else {
-                ground = platforms.create(i * 128, this.game.world.height-128, 'tile_grass');
+                ground = platforms.create(i * 64, this.game.world.height-64, 'tile_grass');
                 ground.body.immovable = true;
+                ground.scale.set(0.5, 0.5);
                 ground.body.friction.x = 0;
             }
         }
@@ -65,8 +65,6 @@ module.exports = (function() {
         player.animations.add('right', [1, 2, 3, 4], 10, true);
         player.animations.add('jump', [5, 6], 10, true);
         player.animations.add('fall', [0], 10, true);
-
-        this.game.camera.follow(player);
     };
 
     o.update = function() {
