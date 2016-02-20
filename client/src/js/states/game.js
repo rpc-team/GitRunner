@@ -16,24 +16,6 @@ module.exports = (function() {
 
     var rest = require('rest-js');
 
-    o.fetchLevelData = function() {
-        // fetch the level data for the player
-        var restApi = rest('http://' + settings.server.host + ':' + settings.server.port + '/', {
-            crossDomain: true,
-            defaultParams: null
-        });
-
-        console.log('fetching level data');
-        restApi.get('player/' + settings.playerID + '/level', {
-            format: null,
-            crossDomain:true
-        }, function(error, data) {
-            console.log('Got Level DAta');
-            level = JSON.parse(data.message);
-        });
-
-    };
-
     o.preload = function() {
         console.log('Game.preload');
 
@@ -44,13 +26,17 @@ module.exports = (function() {
             this.load.image(k, _tiles[k]);
         }
 
-        this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
+        //this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
+        level = {
+            size: 1024,
+            gaps: 5
+        }
     };
 
     o.create = function() {
         console.log('Game.create');
 
-        level = this.game.cache.getJSON('level');
+        //level = this.game.cache.getJSON('level');
         console.log(level);
 
         var sky = this.game.add.sprite(0, 0, 'sky');
@@ -62,15 +48,16 @@ module.exports = (function() {
         for ( var i = 1; i <= level.size; i++ ) {
             if ( i == 4 || level.size % Math.floor(Math.random() * 100) == 0 ) {
                 console.log('generating gap at position: ' + i);
-                i += 5;
+                i += 2;
             } else {
-                ground = platforms.create(i * 64, this.game.world.height-(64*(1+Math.random()*1)), 'tile_grass');
+                ground = platforms.create(i * 128, this.game.world.height-128, 'tile_grass');
                 ground.body.immovable = true;
+                ground.body.friction.x = 0;
             }
         }
 
         // create the player
-        player = this.game.add.sprite(32, 0, 'dude');
+        player = this.game.add.sprite(128, 0, 'dude');
         this.game.physics.arcade.enable(player);
         player.body.bounce.y = 0;
         player.body.gravity.y = 350;
@@ -100,10 +87,10 @@ module.exports = (function() {
     o.run = function() {
         var cursors = this.game.input.keyboard.createCursorKeys();
         var isJumping = !player.body.touching.down;
-        //var isFalling = isJumping && player.body.velocity.y > 0;
 
-        platforms.x -= 5;
-        //player.x += 5;
+        platforms.forEach(function(ground) {
+            ground.body.velocity.x = -150;
+        }, this);
 
         if ( cursors.up.isDown) {
             player.body.velocity.y = -350;
