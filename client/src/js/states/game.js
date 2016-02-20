@@ -13,6 +13,7 @@ module.exports = (function() {
     var state = 'waiting';
     var platforms;
     var level;
+    var numJumps = 0;
 
     o.preload = function() {
         console.log('Game.preload');
@@ -91,7 +92,12 @@ module.exports = (function() {
         }, this);
 
         if ( cursors.up.isDown) {
-            player.body.velocity.y = -350;
+            // enable a single and double jump.
+            // doubleJumps are only allowed on a certain part of the initial jump arc
+            if ( player.body.velocity.y > -100 && numJumps < 1 ) {
+                player.body.velocity.y = -350;
+                numJumps++;
+            }
         }
         if ( cursors.down.isDown) {
             player.body.velocity.y = 800;
@@ -101,6 +107,7 @@ module.exports = (function() {
             player.animations.play('jump');
         } else {
             player.animations.play('right');
+            numJumps = 0;
         }
     };
 

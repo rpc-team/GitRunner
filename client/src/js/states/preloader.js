@@ -44,7 +44,7 @@ module.exports = (function() {
         element = this.game.add.sprite(this.scale.width/2, this.scale.height/2, 'logo');
         element.anchor.set(0.5);
 
-        this.state.start('mainmenu');
+        this.state.start('game');
     };
 
     return o;
