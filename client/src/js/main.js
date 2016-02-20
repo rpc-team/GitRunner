@@ -3,26 +3,40 @@
  */
 (function() {
     console.log("GitRunner booting!");
-    var Controller = require('./controller');
-    var display = {
-        width: 1024,
-        height: 768
-    };
+    var settings = require('../settings');
 
-    var Game = new Phaser.Game(display.width, display.height, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
-    Controller.start();
+    //var states = {
+    //    boot: require('./states/boot'),
+    //    loader: require('./states/loader'),
+    //    mainmenu: require('./states/mainmenu'),
+    //    game: require('./states/game')
+    //};
 
-    function preload() {
+    var Game = new Phaser.Game(settings.display.width,
+                               settings.display.height,
+                               Phaser.AUTO,
+                               ''
+                               //{ preload: preload, create: create, update: update }
+    );
 
-    }
+    Game.state.add('boot', require('./states/boot'));
+    Game.state.add('preloader', require('./states/preloader'));
 
-    function create() {
-
-    }
-
-    function update() {
-
-    }
+    Game.state.start('boot');
 
 })();
+
+/*
+ var rest = require('rest-js');
+
+ var restApi = rest('https://api.github.com/', {
+ crossDomain: true
+ });
+
+ restApi.get('repositories', {
+ format: null
+ }, function(error, data) {
+ console.log(data);
+ });
+ */
