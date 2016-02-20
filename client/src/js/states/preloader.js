@@ -3,6 +3,7 @@
  */
 
 module.exports = (function() {
+    var settings = require('../../settings');
     var o = {};
     var _images = {
         logo: 'assets/logo.png',
@@ -36,6 +37,8 @@ module.exports = (function() {
         for ( k in _spritesheets ) {
             this.load.spritesheet(k, _spritesheets[k].file, _spritesheets[k].width, _spritesheets[k].height);
         }
+
+        this.game.load.json('server_version', 'http://' + settings.server.host + ':' + settings.server.port + '/version');
     };
 
     o.create = function() {

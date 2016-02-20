@@ -14,6 +14,7 @@ module.exports = (function() {
     var platforms;
     var level;
     var numJumps = 0;
+    var serverLabel;
 
     o.preload = function() {
         console.log('Game.preload');
@@ -25,18 +26,19 @@ module.exports = (function() {
             this.load.image(k, _tiles[k]);
         }
 
-        //this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
-        level = {
-            size: 1024,
-            gaps: 5
-        }
+        this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
+        //level = {
+        //    size: 1024,
+        //    gaps: 5
+        //}
     };
 
     o.create = function() {
         console.log('Game.create');
 
-        //level = this.game.cache.getJSON('level');
+        level = this.game.cache.getJSON('level');
         console.log(level);
+        var serverVersion = this.game.cache.getJSON('server_version');
 
         var sky = this.game.add.sprite(0, 0, 'sky');
         sky.width = settings.display.width;
@@ -67,6 +69,9 @@ module.exports = (function() {
         player.animations.add('right', [1, 2, 3, 4], 10, true);
         player.animations.add('jump', [5, 6], 10, true);
         player.animations.add('fall', [0], 10, true);
+
+        // text
+        serverLabel = this.game.add.text(8, 8, getServerVersion(serverVersion), {fontSize: '24', fill: '#000' })
     };
 
     o.update = function() {
@@ -115,6 +120,10 @@ module.exports = (function() {
             numJumps = 0;
         }
     };
+
+    function getServerVersion(o) {
+        return 'Server version: ' + o.name + ' ' + o.version;
+    }
 
     return o;
 })();
