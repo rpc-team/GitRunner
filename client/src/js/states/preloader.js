@@ -15,12 +15,12 @@ module.exports = (function() {
         baddie: {
             file: 'assets/baddie.png',
             width: 32,
-            height: 48
+            height: 32
         },
         dude: {
-            file: 'assets/dude.png',
-            width: 32,
-            height: 48
+            file: 'assets/gaby.png',
+            width: 48,
+            height: 64
         }
     };
     var element;
@@ -45,7 +45,7 @@ module.exports = (function() {
         element = this.game.add.sprite(this.scale.width/2, this.scale.height/2, 'logo');
         element.anchor.set(0.5);
 
-        this.state.start('mainmenu');
+        this.state.start('game');
     };
 
     return o;

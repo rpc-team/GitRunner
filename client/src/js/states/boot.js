@@ -26,6 +26,10 @@ module.exports = (function() {
 
         // lets move along!
         this.state.start('preloader');
+
+        // generate the player ID
+        settings.playerID = Math.floor(1 + Math.random() * 10);
+        console.log("PlayerID = " + settings.playerID);
     };
 
     return o;
