@@ -14,7 +14,7 @@ module.exports = (function() {
     var platforms;
     var level;
     var numJumps = 0;
-    var serverLabel;
+    var serverLabel, gameOverLabel;
 
     o.preload = function() {
         console.log('Game.preload');
@@ -48,7 +48,7 @@ module.exports = (function() {
         var ground;
         for ( var i = 1; i <= level.size; i++ ) {
 
-            if ( i > 15 && level.gaps && (i == Math.floor(level.size / level.gaps)) ) {
+            if ( i > 15 && level.gaps && (i == 17 || i == Math.floor(level.size / level.gaps)) ) {
                 level.gaps--;
                 console.log('generating gap at position: ' + i);
                 i += 2;
@@ -72,6 +72,9 @@ module.exports = (function() {
 
         // text
         serverLabel = this.game.add.text(8, 8, getServerVersion(serverVersion), {fontSize: '24', fill: '#000' })
+        gameOverLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY, 'Game Over', {font: 'bold 96pt arial', fill: '#F00'});
+        gameOverLabel.anchor.set(0.5);
+        gameOverLabel.visible = false;
     };
 
     o.update = function() {
@@ -86,6 +89,16 @@ module.exports = (function() {
             case    'running':
                 this.run();
                 break;
+
+            case    'dead':
+                gameOverLabel.visible = true;
+                var scale = player.scale;
+                if ( scale.x > 0 ) {
+                    scale.x -= 0.05;
+                    scale.y -= 0.05;
+                    player.scale = scale;
+                }
+                break;
         }
     };
 
@@ -94,11 +107,14 @@ module.exports = (function() {
         var isJumping = !player.body.touching.down;
         var runSpeed = 150;
 
-        runSpeed += Math.abs(platforms.children[0].x) / 64;
+        //runSpeed += Math.abs(platforms.children[0].x) / 64;
 
-        platforms.forEach(function(ground, index) {
-            ground.body.velocity.x = -runSpeed;
-        }, this);
+        updateRunnerSpeedTo(runSpeed);
+
+        if ( player.body.bottom >= settings.display.height ) {
+            // kill the player and end the game
+            killPlayer();
+        }
 
 
         if ( cursors.up.isDown) {
@@ -120,6 +136,17 @@ module.exports = (function() {
             numJumps = 0;
         }
     };
+
+    function updateRunnerSpeedTo(speed) {
+        platforms.forEach(function(ground) {
+            ground.body.velocity.x = -speed;
+        }, this);
+    }
+
+    function killPlayer() {
+        state = 'dead';
+        updateRunnerSpeedTo(0);
+    }
 
     function getServerVersion(o) {
         return 'Server version: ' + o.name + ' ' + o.version;
