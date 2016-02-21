@@ -11,6 +11,8 @@ module.exports = (function() {
         tile_bkg: assetPath + 'bg/bg.png',
         tile_obstacle1: assetPath + 'ob/ob1.png',
         tile_obstacle2: assetPath + 'ob/ob2.png',
+        tile_obstacle3: assetPath + 'ob/ob3.png',
+        tile_obstacle4: assetPath + 'ob/ob4.png'
     };
     var player;
     var state = 'waiting';
@@ -110,7 +112,7 @@ module.exports = (function() {
 
                     level.obstacles--;
 
-                    obstacle = obstacles.create((i-1) * 64, this.game.world.height-64, 'tile_obstacle' + Math.floor(1 + Math.random()*2));
+                    obstacle = obstacles.create((i-1) * 64, this.game.world.height-64, 'tile_obstacle' + Math.floor(1 + Math.random()*4));
                     obstacle.anchor.set(0, 1);
                     obstacle.scale.set(0.8, 0.8);
                     obstacle.body.immovable = true;
