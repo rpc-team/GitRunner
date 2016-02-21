@@ -63,6 +63,11 @@ module.exports = (function() {
             this.load.spritesheet(k, _spritesheets[k].file, _spritesheets[k].width, _spritesheets[k].height);
         }
 
+        this.game.load.audio('guitar', 'assets/sounds/guitar.ogg');
+        this.game.load.audio('jump', 'assets/sounds/jump.ogg');
+        this.game.load.audio('drop', 'assets/sounds/drop.ogg');
+        this.game.load.audio('drop_end', 'assets/sounds/drop_end.ogg');
+
         this.game.load.json('server_version', 'http://' + settings.server.host + ':' + settings.server.port + '/version');
     };
 
