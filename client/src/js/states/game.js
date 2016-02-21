@@ -16,7 +16,7 @@ module.exports = (function() {
     };
     var player;
     var state = 'waiting';
-    var platforms;
+    var platforms, nonCollisionGroup;
     var level;
     var numJumps = 0;
     var serverLabel, gameOverLabel;
@@ -76,6 +76,9 @@ module.exports = (function() {
         var sky = this.game.add.sprite(0, 0, 'tile_bkg');
         sky.width = settings.display.width;
 
+        nonCollisionGroup = this.game.add.group();
+        nonCollisionGroup.enableBody = true;
+
         platforms = this.game.add.group();
         platforms.enableBody = true;
 
@@ -115,7 +118,6 @@ module.exports = (function() {
                     obstacle = obstacles.create((i-1) * 64, this.game.world.height-64, 'tile_obstacle' + Math.floor(1 + Math.random()*4));
                     obstacle.body.setSize(obstacle.width*0.8, obstacle.height*0.8, obstacle.width*0.1, obstacle.height*0.1);
                     obstacle.anchor.set(0, 1);
-                    //obstacle.scale.set(64 / obstacle.width, 64/obstacle.height);
                     obstacle.body.immovable = true;
                 }
             }
@@ -124,8 +126,12 @@ module.exports = (function() {
         }
 
         // create the avatar image
-        var avatar = platforms.create(this.game.world.centerX, 64, 'repo-avatar');
-        avatar.scale.set(0.5, 0.5);
+        var signpost = nonCollisionGroup.create(64, this.game.world.height-64, 'signpost');
+        signpost.anchor.set(0, 1);
+        console.log(signpost);
+        var avatar = nonCollisionGroup.create(signpost.x + 18, 245, 'repo-avatar');
+        avatar.scale.set(1, 0.8);
+        avatar.alpha = 0.7;
 
         // create the player
         player = this.game.add.sprite(256, 0, 'dude');
@@ -260,6 +266,10 @@ module.exports = (function() {
 
         obstacles.forEach(function(obstacle) {
             obstacle.body.velocity.x = -speed;
+        }, this);
+
+        nonCollisionGroup.forEach(function(o) {
+            o.body.velocity.x = -speed;
         }, this);
     }
 
