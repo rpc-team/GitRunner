@@ -15,7 +15,7 @@ module.exports = (function() {
     var level;
     var numJumps = 0;
     var serverLabel, gameOverLabel;
-    var deathEmitter;
+    var deathEmitter, jumpEmitter;
 
     o.preload = function() {
         console.log('Game.preload');
@@ -83,7 +83,13 @@ module.exports = (function() {
         gameOverLabel.anchor.set(0.5);
         gameOverLabel.visible = false;
 
-        // emitter
+        // emitters
+        jumpEmitter = this.game.add.emitter(this.game.world.centerX, 0);
+        jumpEmitter.makeParticles('star');
+        jumpEmitter.gravity = 400;
+        jumpEmitter.setAlpha(0, 1);
+        jumpEmitter.setScale(0.5, 0.75, 0.5, 0.75);
+
         deathEmitter = this.game.add.emitter(this.game.world.centerX, 0, 100);
         deathEmitter.makeParticles('heart');
         deathEmitter.gravity = 300;
@@ -136,6 +142,10 @@ module.exports = (function() {
             if ( player.body.velocity.y > -100 && numJumps < 1 ) {
                 player.body.velocity.y = -250;
                 numJumps++;
+
+                jumpEmitter.x = player.worldPosition.x + player.width/2;
+                jumpEmitter.y = player.worldPosition.y + player.height/2;
+                jumpEmitter.start(true, 1000, null, 15);
             }
         }
         if ( cursors.down.isDown) {

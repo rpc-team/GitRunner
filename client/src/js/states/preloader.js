@@ -9,7 +9,8 @@ module.exports = (function() {
         logo: 'assets/logo.png',
         sky: 'assets/sky.png',
         diamond: 'assets/diamond.png',
-        heart: 'assets/heart.png'
+        heart: 'assets/heart.png',
+        star: 'assets/star.png'
     };
     var _spritesheets = {
         baddie: {
