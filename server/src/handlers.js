@@ -74,10 +74,10 @@ function parseGitHubStats(res, owner, repository) {
 
                     var data = {
                         size: allData.repo.size,
-                        obstacles: maxLangSize,
+                        obstacles: Math.floor(maxLangSize / 1024),
                         monsters: allData.repo.subscribers_count,
-                        gap: Object.keys(allData.branches).length,
-                        fire: allData.repo.forks_count,
+                        gaps: Object.keys(allData.branches).length,
+                        fires: allData.repo.forks_count,
                         readme: allData.readme,
                         avatar: 'data:' + contentType + ';base64,' + imgb64
                     };

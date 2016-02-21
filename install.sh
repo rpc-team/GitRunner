@@ -1,4 +1,5 @@
 pushd client/src
+npm i -g browserify
 npm install
 popd
 

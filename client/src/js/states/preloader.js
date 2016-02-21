@@ -10,7 +10,8 @@ module.exports = (function() {
         sky: 'assets/sky.png',
         diamond: 'assets/diamond.png',
         heart: 'assets/heart.png',
-        star: 'assets/star.png'
+        star: 'assets/star.png',
+        obstacles: 'assets/rock.png'
     };
     var _spritesheets = {
         baddie: {

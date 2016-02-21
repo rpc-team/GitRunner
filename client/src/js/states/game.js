@@ -16,6 +16,8 @@ module.exports = (function() {
     var numJumps = 0;
     var serverLabel, gameOverLabel;
     var deathEmitter, jumpEmitter;
+    var scoreText;
+    var cursors, spacebar;
 
     o.preload = function() {
         console.log('Game.preload');
@@ -33,9 +35,10 @@ module.exports = (function() {
     o.create = function() {
         console.log('Game.create');
 
+        cursors = this.game.input.keyboard.createCursorKeys();
+        cursors.spacebar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
         level = this.game.cache.getJSON('level');
-        level.gaps *= 2;
-        console.log(level);
 
         var imgData = new Image();
         imgData.src = level.avatar;
@@ -48,18 +51,43 @@ module.exports = (function() {
 
         platforms = this.game.add.group();
         platforms.enableBody = true;
-        var ground;
+
+        obstacles = this.game.add.group();
+        obstacles.enableBody = true;
+
+        var ground, obstacle;
         for ( var i = 1; i <= level.size; i++ ) {
-            if ( level.gaps && (i == Math.floor(level.size / level.gaps)) ) {
+            var _i = i;
+            if (level.gaps && (i == Math.floor(level.size / level.gaps))) {
+                console.log('generating gap at position: ' + i * 64);
+
                 level.gaps--;
-                console.log('generating gap at position: ' + i);
-                i += 2;
+                _i += 2;
             } else {
                 ground = platforms.create((i-1) * 64, this.game.world.height-64, 'tile_grass');
                 ground.body.immovable = true;
                 ground.scale.set(0.5, 0.5);
                 ground.body.friction.x = 0;
             }
+
+            if(level.obstacles) {
+                expected_position = Math.floor(level.size / level.obstacles);
+                rnd_position = i + Math.floor(Math.random() * ((expected_position + 5) - (expected_position - 5)) + (expected_position - 5));
+                console.log(i, rnd_position);
+
+                if(i === rnd_position) {
+                    console.log('generating obstacle at position: ' + i * 64);
+
+                    level.obstacles--;
+
+                    obstacle = obstacles.create((i-1) * 64, this.game.world.height-135, 'obstacles');
+                    obstacle.body.immovable = true;
+                    obstacle.scale.set(0.5, 0.5);
+                    obstacle.body.friction.x = 0;
+                }
+            }
+
+            i = _i;
         }
 
         // create the avatar image
@@ -78,10 +106,19 @@ module.exports = (function() {
         player.animations.add('fall', [0], 10, true);
 
         // text
-        serverLabel = this.game.add.text(8, 8, getServerVersion(serverVersion), {fontSize: '24', fill: '#000' })
+        serverLabel = this.game.add.text(8, 8, getServerVersion(serverVersion), {fontSize: '24', fill: '#000' });
         gameOverLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY, 'Game Over', {font: 'bold 96pt arial', fill: '#F00'});
         gameOverLabel.anchor.set(0.5);
         gameOverLabel.visible = false;
+        scoreText = this.game.add.text(0, 0, returnCurrentScore(0), {
+            font: '30px Arial',
+            fill: '#000',
+            align: 'center',
+            boundsAlignH: 'left',
+            boundsAlignV: 'top',
+            backgroundColor: '#999'
+        });
+        scoreText.setTextBounds(50, 30, 150, 0);
 
         // emitters
         jumpEmitter = this.game.add.emitter(this.game.world.centerX, 0);
@@ -97,18 +134,19 @@ module.exports = (function() {
 
     o.update = function() {
         this.game.physics.arcade.collide(player, platforms);
-        switch ( state ) {
-            case    'waiting':
-                if ( player.body.touching.down ) {
+        this.game.physics.arcade.collide(player, obstacles);
+        switch (state) {
+            case 'waiting':
+                if (player.body.touching.down) {
                     state = 'running';
                 }
                 break;
 
-            case    'running':
+            case 'running':
                 this.run();
                 break;
 
-            case    'dead':
+            case 'dead':
                 gameOverLabel.visible = true;
                 var scale = player.scale;
                 if ( scale.x > 0 ) {
@@ -121,7 +159,6 @@ module.exports = (function() {
     };
 
     o.run = function() {
-        var cursors = this.game.input.keyboard.createCursorKeys();
         var isJumping = !player.body.touching.down;
         var runSpeed = 150;
 
@@ -135,8 +172,9 @@ module.exports = (function() {
             killPlayer();
         }
 
+        scoreText.setText(returnCurrentScore(parseInt(runSpeed)));
 
-        if ( cursors.up.isDown) {
+        if (cursors.up.isDown || cursors.spacebar.isDown) {
             // enable a single and double jump.
             // doubleJumps are only allowed on a certain part of the initial jump arc
             if ( player.body.velocity.y > -100 && numJumps < 1 ) {
@@ -148,11 +186,11 @@ module.exports = (function() {
                 jumpEmitter.start(true, 1000, null, 15);
             }
         }
-        if ( cursors.down.isDown) {
+        if (cursors.down.isDown) {
             player.body.velocity.y = 800;
         }
 
-        if ( isJumping ) {
+        if (isJumping) {
             player.animations.play('jump');
         } else {
             player.animations.play('right');
@@ -164,6 +202,10 @@ module.exports = (function() {
         platforms.forEach(function(ground) {
             ground.body.velocity.x = -speed;
         }, this);
+
+        obstacles.forEach(function(obstacle, index) {
+            obstacle.body.velocity.x = -speed;
+        }, this);
     }
 
     function killPlayer() {
@@ -172,6 +214,10 @@ module.exports = (function() {
         deathEmitter.x = player.worldPosition.x + player.width/2;
         deathEmitter.y = player.worldPosition.y + player.height/2;
         deathEmitter.start(true, 2000, null, 15);
+    }
+
+    function returnCurrentScore(score) {
+        return 'Score: ' + score;
     }
 
     function getServerVersion(o) {
