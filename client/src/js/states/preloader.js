@@ -11,7 +11,10 @@ module.exports = (function() {
         diamond: 'assets/diamond.png',
         heart: 'assets/heart.png',
         star: 'assets/star.png',
-        signpost: 'assets/avatar.png'
+        signpost: 'assets/avatar.png',
+        btn_crissy: 'assets/diamond.png',
+        btn_peter: 'assets/diamond.png',
+        btn_ricardo: 'assets/diamond.png'
     };
     var _spritesheets = {
         baddie: {
@@ -50,7 +53,7 @@ module.exports = (function() {
         element = this.game.add.sprite(this.scale.width/2, this.scale.height/2, 'logo');
         element.anchor.set(0.5);
 
-        this.state.start('game');
+        this.state.start('mainmenu');
     };
 
     return o;
