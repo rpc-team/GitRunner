@@ -153,7 +153,6 @@ module.exports = (function() {
             drop.play();
         }
         this.game.physics.arcade.collide(player, platforms);
-        this.game.physics.arcade.collide(player, obstacles, onObstacleCollide);
         switch (state) {
             case 'waiting':
                 if (player.body.touching.down) {
@@ -163,7 +162,10 @@ module.exports = (function() {
                 break;
 
             case 'running':
-                this.run();
+                this.game.physics.arcade.collide(player, obstacles, onObstacleCollide);
+                if ( state == 'running' ) {
+                    this.run();
+                }
                 break;
 
             case 'dead':
@@ -228,7 +230,7 @@ module.exports = (function() {
             ground.body.velocity.x = -speed;
         }, this);
 
-        obstacles.forEach(function(obstacle, index) {
+        obstacles.forEach(function(obstacle) {
             obstacle.body.velocity.x = -speed;
         }, this);
     }
