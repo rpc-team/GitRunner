@@ -220,7 +220,7 @@ module.exports = (function() {
             // enable a single and double jump.
             // doubleJumps are only allowed on a certain part of the initial jump arc
             if ( player.body.velocity.y > -100 && numJumps < 2 ) {
-                player.body.velocity.y = -250;
+                player.body.velocity.y = -275;
                 if(soundsEnabled) jump.play();
                 numJumps++;
 
