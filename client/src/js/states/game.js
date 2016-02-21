@@ -13,6 +13,8 @@ module.exports = (function() {
     var platforms, nonCollisionGroup;
     var obstacles, monsters;
 
+    var levelOffset;
+
     var level, levelGenerationIteration = 1;
     var numJumps = 0;
     var serverLabel, gameOverLabel;
@@ -29,7 +31,7 @@ module.exports = (function() {
     var next_position = {};
     var empty_gaps = [];
 
-    var COLLIDE_ENABLED = true;
+    var COLLIDE_ENABLED = false;
 
     o.preload = function() {
         console.log('Selected Character: ' + settings.selectedCharacter);
@@ -107,8 +109,10 @@ module.exports = (function() {
         monsters.enableBody = true;
 
         // level.gaps = 1500;
-        level.monsters *= 10
+        levelOffset = Math.floor(256/64);
+        level.size += levelOffset;
         var levelSize = 20;
+        console.log('level size = ' + levelSize);
         //for ( var i = 1; i <= level.size; i++ ) {
         for ( levelGenerationIteration = 1; levelGenerationIteration <= levelSize; levelGenerationIteration++ ) {
             if (level.gaps) {
@@ -209,7 +213,7 @@ module.exports = (function() {
 
         runSpeed = runSpeed || 0;
 
-        expected_position = Math.floor(level.size / level.gaps);
+        expected_position = Math.floor((level.size-levelOffset) / level.gaps);
 
         if(!next_position.gaps) next_position.gaps = expected_position;
 
@@ -248,56 +252,65 @@ module.exports = (function() {
     o.generateNextObstacle = function(i, obstacles) {
         var min, max, rnd_position, expected_position, obstacle;
 
-        expected_position = Math.floor(level.size / level.obstacles);
+        level.obstaclesCreated = level.obstaclesCreated || 0;
+        if ( level.obstaclesCreated < level.obstacles ) {
+            expected_position = Math.floor((level.size-levelOffset) / level.obstacles);
 
-        if(i/expected_position === Math.floor(i/expected_position) && next_position.obstacles) {
-            if(i === next_position.obstacles) {
-                min = next_position.obstacles * 0.9;
-                max = next_position.obstacles * 1.1;
-                rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
+            if(i/expected_position === Math.floor(i/expected_position) && next_position.obstacles) {
+                if(i === next_position.obstacles) {
+                    min = next_position.obstacles * 0.9;
+                    max = next_position.obstacles * 1.1;
+                    rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
 
-                if(this.game.world.centerX < rnd_position) {
-                    console.log('generating obstacle at position: ' + rnd_position);
+                    if(this.game.world.centerX < rnd_position) {
+                        console.log('generating obstacle at position: ' + rnd_position);
 
-                    obstacle = obstacles.create(rnd_position, this.game.world.height - 64, 'tile_obstacle' + Math.floor(1 + Math.random()*4));
-                    obstacle.body.setSize(obstacle.width * 0.8, obstacle.height * 0.8, obstacle.width * 0.1, obstacle.height * 0.1);
-                    obstacle.anchor.set(0, 1);
-                    obstacle.body.immovable = true;
+                        obstacle = obstacles.create(rnd_position, this.game.world.height - 64, 'tile_obstacle' + Math.floor(1 + Math.random()*4));
+                        obstacle.body.setSize(obstacle.width * 0.8, obstacle.height * 0.8, obstacle.width * 0.1, obstacle.height * 0.1);
+                        obstacle.anchor.set(0, 1);
+                        obstacle.body.immovable = true;
+                        level.obstaclesCreated++;
+                    }
                 }
+
+                next_position.obstacles = i + expected_position;
+            } else if(!next_position.obstacles) {
+                next_position.obstacles = expected_position;
             }
 
-            next_position.obstacles = i + expected_position;
-        } else if(!next_position.obstacles) {
-            next_position.obstacles = expected_position;
         }
     };
 
     o.generateNextMonster = function(i, monsters) {
         var min, max, rnd_position, expected_position, monster;
 
-        expected_position = Math.floor(level.size / level.monsters);
+        level.monstersCreated = level.monstersCreated || 0;
+        if ( level.monstersCreated < level.monsters ) {
+            expected_position = Math.floor((level.size-levelOffset) / level.monsters);
 
-        if(i/expected_position === Math.floor(i/expected_position) && next_position.monsters) {
-            if(i === next_position.monsters) {
-                min = next_position.monsters * 0.9;
-                max = next_position.monsters * 1.1;
-                rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
+            if(i/expected_position === Math.floor(i/expected_position) && next_position.monsters) {
+                if(i === next_position.monsters) {
+                    min = next_position.monsters * 0.9;
+                    max = next_position.monsters * 1.1;
+                    rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
 
-                if(this.game.world.centerX < rnd_position) {
-                    console.log('generating monster at position: ' + rnd_position);
+                    if(this.game.world.centerX < rnd_position) {
+                        console.log('generating monster at position: ' + rnd_position);
 
-                    monster = monsters.create(rnd_position, this.game.world.height - 64, 'tile_monster' + Math.floor(1 + Math.random()*4));
-                    monster.body.setSize(monster.width * 0.8, monster.height * 0.8, monster.width * 0.1, monster.height * 0.1);
-                    monster.anchor.set(0, 1);
-                    monster.body.immovable = true;
+                        monster = monsters.create(rnd_position, this.game.world.height - 64, 'tile_monster' + Math.floor(1 + Math.random()*4));
+                        monster.body.setSize(monster.width * 0.8, monster.height * 0.8, monster.width * 0.1, monster.height * 0.1);
+                        monster.anchor.set(0, 1);
+                        monster.body.immovable = true;
 
-                    this.game.add.tween(monster).to({ y: this.game.world.height - monster.height * 2 }, 300, Phaser.Easing.Sinusoidal.Out, true, 0, -1, true)
+                        this.game.add.tween(monster).to({ y: this.game.world.height - monster.height * 2 }, 300, Phaser.Easing.Sinusoidal.Out, true, 0, -1, true)
+                        level.monstersCreated++;
+                    }
                 }
-            }
 
-            next_position.monsters = i + expected_position;
-        } else if (!next_position.monsters) {
-            next_position.monsters = expected_position;
+                next_position.monsters = i + expected_position;
+            } else if (!next_position.monsters) {
+                next_position.monsters = expected_position;
+            }
         }
     }
 

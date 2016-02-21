@@ -31,7 +31,8 @@ function generateID() {
 };
 
 function getStartLevel(){
-    return ['Odobo', 'odobox'];
+    return ['rpc-team', 'GitRunner'];
+    //return ['Odobo', 'odobox'];
 }
 
 function getNextLevel(prevOwner, prevRepo){
@@ -107,10 +108,19 @@ function parseGitHubStats(playerID, gameID, owner, repository, res) {
 
                     Object.keys(allData.languages).map(function(v) { if(allData.languages[v] > maxLangSize) maxLangSize = allData.languages[v]; });
 
+                    //function returnBestRepoSize(size){
+                    //    var minSize = (Math.floor(maxLangSize / 1024) + allData.repo.subscribers_count) * 5;
+                    //    var maxSize = 2500;
+                    //    if(size > 2500) {
+                    //        return
+                    //    }
+                    //}
+
+
                     var data = {
                         playerID: playerID,
                         gameID: gameID,
-                        size: allData.repo.size,
+                        size: (Math.floor(maxLangSize / 1024) + allData.repo.subscribers_count) * 5,
                         obstacles: Math.floor(maxLangSize / 1024),
                         monsters: allData.repo.subscribers_count,
                         gaps: Object.keys(allData.branches).length,
