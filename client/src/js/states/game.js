@@ -30,7 +30,9 @@ module.exports = (function() {
 
         // load images
         for (var k in _tiles) {
-            this.load.image(k, _tiles[k]);
+            if (_tiles.hasOwnProperty(k) ) {
+                this.load.image(k, _tiles[k]);
+            }
         }
 
         this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
@@ -116,7 +118,6 @@ module.exports = (function() {
         }
 
         // create the avatar image
-        //this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'repo-avatar');
         var avatar = platforms.create(this.game.world.centerX, 64, 'repo-avatar');
         avatar.scale.set(0.5, 0.5);
 
