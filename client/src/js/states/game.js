@@ -18,7 +18,10 @@ module.exports = (function() {
     var deathEmitter, jumpEmitter;
     var scoreText;
     var cursors, spacebar;
-    var music, jump, drop, drop_end;
+    var music, jump, drop, drop_end, soundsEnabled = true;
+
+    // temporary usage..
+    var grayFilter;
 
     o.preload = function() {
         console.log('Game.preload');
@@ -31,15 +34,14 @@ module.exports = (function() {
         }
 
         this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
-        //level = {
-        //    size: 1024,
-        //    gaps: 5
-        //}
 
         this.game.load.audio('guitar', 'assets/sounds/guitar.ogg');
         this.game.load.audio('jump', 'assets/sounds/jump.ogg');
         this.game.load.audio('drop', 'assets/sounds/drop.ogg');
         this.game.load.audio('drop_end', 'assets/sounds/drop_end.ogg');
+
+        // temporary usage..
+        this.game.load.script('gray', 'https://cdn.rawgit.com/photonstorm/phaser/master/filters/Gray.js');
     };
 
     o.create = function() {
@@ -48,10 +50,13 @@ module.exports = (function() {
         cursors = this.game.input.keyboard.createCursorKeys();
         cursors.spacebar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
-        music = this.game.add.audio('guitar',1,true);
-        jump = this.game.add.audio('jump',1);
-        drop = this.game.add.audio('drop',1);
-        drop_end = this.game.add.audio('drop_end',1);
+        music = this.game.add.audio('guitar', 1, true);
+        jump = this.game.add.audio('jump', 1);
+        drop = this.game.add.audio('drop', 1);
+        drop_end = this.game.add.audio('drop_end', 1);
+
+        // temporary usage..
+        grayFilter = this.game.add.filter('Gray');
 
         level = this.game.cache.getJSON('level');
 
@@ -72,24 +77,29 @@ module.exports = (function() {
 
         var ground, obstacle;
         for ( var i = 1; i <= level.size; i++ ) {
-            var _i = i;
-            if (level.gaps && (i == Math.floor(level.size / level.gaps))) {
-                console.log('generating gap at position: ' + i * 64);
+            var _i = i, expected_position;
+            if (level.gaps) {
+                expected_position = Math.floor(level.size / level.gaps);
+                if(expected_position * 64 < 300) level.obstacles--;
 
-                level.gaps--;
-                _i += 2;
-            } else {
-                ground = platforms.create((i-1) * 64, this.game.world.height-64, 'tile_grass');
-                ground.body.immovable = true;
-                ground.scale.set(0.5, 0.5);
-                ground.body.friction.x = 0;
+                if(i == expected_position) {
+                    console.log('generating gap at position: ' + i * 64);
+
+                    level.gaps--;
+                    _i += 2;
+                } else {
+                    ground = platforms.create((i-1) * 64, this.game.world.height-64, 'tile_grass');
+                    ground.body.immovable = true;
+                    ground.scale.set(0.5, 0.5);
+                    ground.body.friction.x = 0;
+                }
             }
 
             if(level.obstacles) {
                 expected_position = Math.floor(level.size / level.obstacles);
-                rnd_position = i + Math.floor(Math.random() * ((expected_position + 5) - (expected_position - 5)) + (expected_position - 5));
-                console.log(i, rnd_position);
+                if(expected_position * 64 < 300) level.obstacles--;
 
+                rnd_position = i + Math.floor(Math.random() * ((expected_position + 5) - (expected_position - 5)) + (expected_position - 5));
                 if(i === rnd_position) {
                     console.log('generating obstacle at position: ' + i * 64);
 
@@ -145,20 +155,23 @@ module.exports = (function() {
         deathEmitter = this.game.add.emitter(this.game.world.centerX, 0, 100);
         deathEmitter.makeParticles('heart');
         deathEmitter.gravity = 300;
+
+        startButton = this.game.add.button(this.game.world.width - 60, 30, 'diamond', playPauseSound, this);
     };
 
     o.update = function() {
-        if ( !music.isPlaying ) {
+        if (!music.isPlaying && soundsEnabled) {
             music.play();
             drop.play();
         }
+
         this.game.physics.arcade.collide(player, platforms);
         this.game.physics.arcade.collide(player, obstacles, onObstacleCollide);
         switch (state) {
             case 'waiting':
                 if (player.body.touching.down) {
                     state = 'running';
-                    drop_end.play();
+                    if(soundsEnabled) drop_end.play();
                 }
                 break;
 
@@ -190,8 +203,7 @@ module.exports = (function() {
 
         updateRunnerSpeedTo(runSpeed);
 
-        if ( player.body.bottom >= settings.display.height ||
-             player.body.touching.right ) {
+        if (player.body.bottom >= settings.display.height || player.body.touching.right) {
             // kill the player and end the game
             killPlayer();
         }
@@ -203,7 +215,7 @@ module.exports = (function() {
             // doubleJumps are only allowed on a certain part of the initial jump arc
             if ( player.body.velocity.y > -100 && numJumps < 1 ) {
                 player.body.velocity.y = -250;
-                jump.play();
+                if(soundsEnabled) jump.play();
                 numJumps++;
 
                 jumpEmitter.x = player.worldPosition.x + player.width/2;
@@ -222,6 +234,17 @@ module.exports = (function() {
             numJumps = 0;
         }
     };
+
+    function playPauseSound() {
+        if(music.isPlaying) {
+            soundsEnabled = false;
+            music.pause();
+            startButton.filters = [grayFilter];
+        } else {
+            music.play();
+            startButton.filters = null;
+        }
+    }
 
     function updateRunnerSpeedTo(speed) {
         platforms.forEach(function(ground) {
