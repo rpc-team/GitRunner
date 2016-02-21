@@ -59,7 +59,7 @@ module.exports = (function() {
 
         this.load.spritesheet('dude', 'assets/' + settings.selectedCharacter + '.png', 48, 64);
 
-        this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
+        this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/game/start/' + settings.playerID);
 
         // temporary usage..
         this.game.load.script('gray', 'https://cdn.rawgit.com/photonstorm/phaser/master/filters/Gray.js');
