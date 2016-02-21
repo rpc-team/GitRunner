@@ -119,7 +119,7 @@ module.exports = (function() {
                         if(this.game.world.centerX < rnd_position) {
                             console.log('generating obstacle at position: ' + rnd_position);
 
-                            obstacle = obstacles.create(rnd_position, this.game.world.height - 64, 'obstacles' + Math.floor(1 + Math.random()*4));
+                            obstacle = obstacles.create(rnd_position, this.game.world.height - 64, 'tile_obstacle' + Math.floor(1 + Math.random()*4));
                             obstacle.body.setSize(obstacle.width*0.8, obstacle.height*0.8, obstacle.width*0.1, obstacle.height*0.1);
                             obstacle.anchor.set(0, 1);
                             obstacle.body.immovable = true;
