@@ -109,14 +109,14 @@ module.exports = (function() {
 
                 if(i/expected_position === Math.floor(i/expected_position) && next_position) {
                     if(i === next_position) {
-                        var min = next_position * 0.4, max = next_position * 1.3;
+                        var min = next_position * 0.9, max = next_position * 1.1;
                         rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
 
                         console.log(this.game.world.centerX, expected_position, rnd_position)
                         if(this.game.world.centerX < rnd_position) {
                             console.log('generating obstacle at position: ' + rnd_position);
 
-                            obstacle = obstacles.create(rnd_position, this.game.world.height - 64, 'obstacles' + Math.floor(1 + Math.random()*4));
+                            obstacle = obstacles.create(rnd_position, this.game.world.height - 64, 'tile_obstacle' + Math.floor(1 + Math.random()*4));
                             obstacle.body.setSize(obstacle.width*0.8, obstacle.height*0.8, obstacle.width*0.1, obstacle.height*0.1);
                             obstacle.anchor.set(0, 1);
                             obstacle.body.immovable = true;
