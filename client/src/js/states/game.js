@@ -112,7 +112,7 @@ module.exports = (function() {
 
                 if(i/expected_position === Math.floor(i/expected_position) && next_position) {
                     if(i === next_position) {
-                        var min = next_position * 0.4, max = next_position * 1.3;
+                        var min = next_position * 0.9, max = next_position * 1.1;
                         rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
 
                         console.log(this.game.world.centerX, expected_position, rnd_position)
