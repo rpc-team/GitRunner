@@ -114,7 +114,7 @@ module.exports = (function() {
 
                     obstacle = obstacles.create((i-1) * 64, this.game.world.height-64, 'tile_obstacle' + Math.floor(1 + Math.random()*4));
                     obstacle.anchor.set(0, 1);
-                    obstacle.scale.set(0.8, 0.8);
+                    //obstacle.scale.set(64 / obstacle.width, 64/obstacle.height);
                     obstacle.body.immovable = true;
                 }
             }
@@ -219,7 +219,7 @@ module.exports = (function() {
         if (cursors.up.isDown || cursors.spacebar.isDown) {
             // enable a single and double jump.
             // doubleJumps are only allowed on a certain part of the initial jump arc
-            if ( player.body.velocity.y > -100 && numJumps < 1 ) {
+            if ( player.body.velocity.y > -100 && numJumps < 2 ) {
                 player.body.velocity.y = -250;
                 if(soundsEnabled) jump.play();
                 numJumps++;
