@@ -120,6 +120,8 @@ function parseGitHubStats(playerID, gameID, owner, repository, res) {
                     var data = {
                         playerID: playerID,
                         gameID: gameID,
+                        owner: owner,
+                        repository: repository,
                         size: (Math.floor(maxLangSize / 1024) + allData.repo.subscribers_count) * 5,
                         obstacles: Math.floor(maxLangSize / 1024),
                         monsters: allData.repo.subscribers_count,
