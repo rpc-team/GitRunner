@@ -45,6 +45,21 @@ module.exports = (function() {
             file: 'assets/mm_c1.png',
             width: 230,
             height: 230
+        },
+        btn_help: {
+            file: 'assets/help.png',
+            width: 240,
+            height: 240
+        },
+        btn_arrow: {
+            file: 'assets/arrow.png',
+            width: 64,
+            height: 64
+        },
+        btn_close: {
+            file: 'assets/close.png',
+            width: 64,
+            height: 64
         }
     };
     var element;
