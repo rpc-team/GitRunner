@@ -25,7 +25,7 @@ module.exports = (function() {
     var platforms, nonCollisionGroup;
     var obstacles, monsters;
 
-    var level;
+    var level, levelGenerationIteration = 1;
     var numJumps = 0;
     var serverLabel, gameOverLabel;
     var deathEmitter, jumpEmitter;
@@ -38,6 +38,8 @@ module.exports = (function() {
 
     var next_position = {};
     var empty_gaps = [];
+
+    var COLLIDE_ENABLED = true;
 
     o.preload = function() {
         console.log('Selected Character: ' + settings.selectedCharacter);
@@ -100,22 +102,21 @@ module.exports = (function() {
         monsters = this.game.add.group();
         monsters.enableBody = true;
 
-        var ground, obstacle, monster;
-        var expected_position, min, max, rnd_position;
         // level.gaps = 1500;
         level.monsters *= 10
-        var levelSize = 100;
-        for ( var i = 1; i <= level.size; i++ ) {
+        var levelSize = 20;
+        //for ( var i = 1; i <= level.size; i++ ) {
+        for ( levelGenerationIteration = 1; levelGenerationIteration <= levelSize; levelGenerationIteration++ ) {
             if (level.gaps) {
-                o.generateNextGap(i, platforms);
+                o.generateNextGap(levelGenerationIteration, platforms);
             }
 
             if(level.obstacles) {
-                o.generateNextObstacle(i, obstacles);
+                o.generateNextObstacle(levelGenerationIteration, obstacles);
             }
 
             if(level.monsters) {
-                o.generateNextMonster(i, monsters);
+                o.generateNextMonster(levelGenerationIteration, monsters);
             }
         }
 
@@ -161,7 +162,7 @@ module.exports = (function() {
         deathEmitter.makeParticles('heart');
         deathEmitter.gravity = 300;
 
-        startButton = this.game.add.button(this.game.world.width - 60, 30, 'diamond', playPauseSound, this);
+        this.game.add.button(this.game.world.width - 60, 30, 'diamond', playPauseSound, this);
     };
 
     o.update = function() {
@@ -180,7 +181,7 @@ module.exports = (function() {
                 break;
 
             case 'running':
-                if ( !this.game.physics.arcade.collide(player, obstacles, onObstacleCollide) ) {
+                if ( !COLLIDE_ENABLED || (COLLIDE_ENABLED && !this.game.physics.arcade.collide(player, obstacles, onObstacleCollide)) ) {
                     this.run();
                 }
                 break;
@@ -191,36 +192,45 @@ module.exports = (function() {
         }
     };
 
-    o.generateNextGap = function(i, platforms) {
+    o.generateNextGap = function(i, platforms, runSpeed) {
         var min, max, rnd_position, expected_position, ground;
+
+        runSpeed = runSpeed || 0;
 
         expected_position = Math.floor(level.size / level.gaps);
 
         if(!next_position.gaps) next_position.gaps = expected_position;
 
-        if(i/expected_position === Math.floor(i/expected_position) && next_position.gaps) {
-
-            if(i === next_position.gaps) {
-                min = next_position.gaps * 0.9;
-                max = next_position.gaps * 1.1;
-                rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
-
-                if(this.game.world.centerX < rnd_position) {
-                    console.log('generating gap at position: ' + rnd_position);
-
-                    empty_gaps.push(rnd_position / 64);
-                }
-
-                next_position.gaps = i + expected_position;
-            }
-        }
-
-        if((empty_gaps).indexOf(i) === -1) {
-            ground = platforms.create((i-1) * 64, this.game.world.height-64, 'tile_floor');
-            ground.body.immovable = true;
-            ground.scale.set(0.5, 0.5);
-            ground.body.friction.x = 0;
-        }
+        //if(i/expected_position === Math.floor(i/expected_position) && next_position.gaps) {
+        //
+        //    if(i === next_position.gaps) {
+        //        min = next_position.gaps * 0.9;
+        //        max = next_position.gaps * 1.1;
+        //        rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
+        //
+        //        if(this.game.world.centerX < rnd_position) {
+        //            console.log('generating gap at position: ' + rnd_position);
+        //
+        //            empty_gaps.push(rnd_position / 64);
+        //        }
+        //
+        //        next_position.gaps = i + expected_position;
+        //    }
+        //}
+        //
+        //if((empty_gaps).indexOf(i) === -1) {
+        //    ground = platforms.create((i-1) * 64, this.game.world.height-64, 'tile_floor');
+        //    ground.body.immovable = true;
+        //    ground.scale.set(0.5, 0.5);
+        //    ground.body.friction.x = 0;
+        //}
+        var lastChild = platforms.children[i-2];
+        var nextX = lastChild ? lastChild.x + lastChild.width - Math.ceil(runSpeed/64) - 2: (i-1) * 64;
+        //ground = platforms.create((i-1) * 64, this.game.world.height-64, 'tile_floor');
+        ground = platforms.create(nextX, this.game.world.height-64, 'tile_floor');
+        ground.body.immovable = true;
+        ground.scale.set(0.5, 0.5);
+        ground.body.friction.x = 0;
     };
 
     o.generateNextObstacle = function(i, obstacles) {
@@ -297,21 +307,45 @@ module.exports = (function() {
 
     o.run = function() {
         var isJumping = !player.body.touching.down;
-        var runSpeed = 200;
+        var runSpeed = 250;
 
         runSpeed += Math.abs(platforms.children[0].x) / 64;
 
-        updateRunnerSpeedTo(runSpeed);
+        this.lastTime = this.lastTime || this.game.time.now;
 
-        if (player.body.bottom >= settings.display.height || player.body.touching.right) {
-            // kill the player and end the game
-            killPlayer();
-            return;
+        if ( this.lastTime >= this.game.time.now ) {
+            if ( levelGenerationIteration < level.size ) {
+                if (level.gaps) {
+                    o.generateNextGap(levelGenerationIteration, platforms, runSpeed);
+                }
+
+                if(level.obstacles) {
+                    o.generateNextObstacle(levelGenerationIteration, obstacles);
+                }
+
+                if(level.monsters) {
+                    o.generateNextMonster(levelGenerationIteration, monsters);
+                }
+                levelGenerationIteration++;
+            }
         }
 
-        if ( this.game.physics.arcade.collide(player, monsters, onMonsterCollide) ) {
-            if ( state == 'dead' ) {
+        this.lastTime = this.game.time.now + 100;
+
+
+        updateRunnerSpeedTo(runSpeed);
+
+        if ( COLLIDE_ENABLED ) {
+            if ( (player.body.bottom >= settings.display.height || player.body.touching.right) ) {
+                // kill the player and end the game
+                killPlayer();
                 return;
+            }
+
+            if ( this.game.physics.arcade.collide(player, monsters, onMonsterCollide) ) {
+                if ( state == 'dead' ) {
+                    return;
+                }
             }
         }
 
