@@ -31,6 +31,7 @@ module.exports = (function() {
         console.log('Preloader.preload');
 
         // load images
+        var k;
         for ( k in _images ) {
             this.load.image(k, _images[k]);
         }

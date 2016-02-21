@@ -31,7 +31,7 @@ module.exports = (function() {
         startButton.anchor.set(0.5);
 
         // text
-        serverLabel = this.game.add.text(8, settings.display.height - 16, getServerVersion(serverVersion), {fontSize: '24', fill: '#000' })
+        serverLabel = this.game.add.text(8, settings.display.height - 16, getServerVersion(serverVersion), {fontSize: '24', fill: '#000' });
     };
 
     o.update = function() {
@@ -40,9 +40,9 @@ module.exports = (function() {
         baddie.animations.play('left');
 
         var curScale = startButton.scale;
-        curScale.x += 0.02 * direction
+        curScale.x += 0.02 * direction;
         curScale.y += 0.02 * direction;
-        if ( curScale.x >= 2 ) direction = -1
+        if ( curScale.x >= 2 ) direction = -1;
         if ( curScale.x <= 1 ) direction = 1;
         startButton.scale.set(curScale.x, curScale.y);
     };
