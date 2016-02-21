@@ -12,9 +12,13 @@ module.exports = (function() {
         heart: 'assets/heart.png',
         star: 'assets/star.png',
         signpost: 'assets/avatar.png',
-        btn_crissy: 'assets/diamond.png',
-        btn_peter: 'assets/diamond.png',
-        btn_ricardo: 'assets/diamond.png'
+        mainmenu_bkg: 'assets/mm_bg.png'
+        //btn_crissy_normal: 'assets/mm_c3_off.png',
+        //btn_peter_normal: 'assets/mm_c2_off.png',
+        //btn_ricardo_normal: 'assets/mm_c1_off.png',
+        //btn_crissy_hover: 'assets/mm_c3_on.png',
+        //btn_peter_hover: 'assets/mm_c2_on.png',
+        //btn_ricardo_hover: 'assets/mm_c1_on.png'
     };
     var _spritesheets = {
         baddie: {
@@ -26,6 +30,21 @@ module.exports = (function() {
             file: 'assets/peter.png',
             width: 48,
             height: 64
+        },
+        btn_peter: {
+            file: 'assets/mm_c2.png',
+            width: 230,
+            height: 230
+        },
+        btn_crissy: {
+            file: 'assets/mm_c3.png',
+            width: 230,
+            height: 230
+        },
+        btn_ricardo: {
+            file: 'assets/mm_c1.png',
+            width: 230,
+            height: 230
         }
     };
     var element;

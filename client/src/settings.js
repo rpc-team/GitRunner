@@ -8,5 +8,5 @@ module.exports = {
         height: 576
     },
     physicsEngine: 'ARCADE',
-    selectedCharacer: 'criss'
+    selectedCharacter: 'criss'
 };

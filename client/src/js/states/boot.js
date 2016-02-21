@@ -17,7 +17,7 @@ module.exports = (function() {
         this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 
         // set the background colour
-        this.game.stage.backgroundColor = '#FFDDAA';
+        this.game.stage.backgroundColor = '#000';
 
         // start the physics system
         this.game.physics.startSystem(Phaser.Physics[settings.physicsEngine]);
