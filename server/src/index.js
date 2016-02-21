@@ -5,6 +5,8 @@ var handlers = require('./handlers');
 
 var GitHubAPI = require('github');
 
+var bodyParser = require('body-parser');
+
 app.exposeEndpoints = function() {
 
     app.get('/', function(req, res) {
@@ -61,6 +63,7 @@ exports.boot = function(config) {
         next();
     });
 
+    app.use(bodyParser.json());
     app.exposeEndpoints();
     app.initGitHub();
 

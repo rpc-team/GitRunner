@@ -203,22 +203,37 @@ module.exports = function() {
             var body = req.body;
 
             if(body && body.playerID && body.nickname && body.gameID && body.score){
-                if(isScoreValid(body)){
-                    var insertDocument = function(db, callback) {
-                        db.collection('gameplay').insertOne( {} )
+                checkScore(body, function (isValid){
+                    if (isValid){
+                            db.collection('gameplay').updateOne({ "_id" : body.playerID + "_" + body.gameID }, { $set: { "score": body.score, "nickname": body.nickname, "completedTimestamp": Date.now()}}, function(err, result) {
+                                if(!err) {
+                                    res.send();
+                                } else {
+                                    res.status(500).send({ message: 'Failed to update gameplay into db' });
+                                }
+                            });
+                    } else {
+                        return res.status(403).send({ message: 'Score Invalid'});
                     }
-                } else {
-                    return res.status(403).send({ message: 'Score Invalid'});
-                }
+                });
             } else {
                 return res.status(400).send({ message: 'Bad Request'});
             }
 
 
 
-            function isScoreValid(params){
-                //TODO insert validation of parameters + minimal security tests for the validity of the score
-                return true;
+            function checkScore(params, cb){
+                var cursor = db.collection('gameplay').findOne({ "_id" : params.playerID + "_" + params.gameID}, function(err, doc){
+                    if(!err && doc) {
+                        if(params.score <= doc.maxScoreSize){
+                            cb(true);
+                        } else {
+                            cb(false);
+                        }
+                    } else {
+                        cb(false);
+                    }
+                });
             };
         }
     };
