@@ -138,11 +138,9 @@ module.exports = (function() {
         gameOverLabel.visible = false;
         scoreText = this.game.add.text(0, 0, returnCurrentScore(0), {
             font: '30px Arial',
-            fill: '#000',
             align: 'center',
             boundsAlignH: 'left',
-            boundsAlignV: 'top',
-            backgroundColor: '#999'
+            boundsAlignV: 'top'
         });
         scoreText.setTextBounds(50, 30, 150, 0);
 
@@ -210,7 +208,7 @@ module.exports = (function() {
             killPlayer();
         }
 
-        scoreText.setText(returnCurrentScore(parseInt(runSpeed)));
+        scoreText.setText(returnCurrentScore(0-platforms.children[0].worldPosition.x / 64));
 
         if (cursors.up.isDown || cursors.spacebar.isDown) {
             // enable a single and double jump.
@@ -267,7 +265,8 @@ module.exports = (function() {
     }
 
     function returnCurrentScore(score) {
-        return 'Score: ' + score;
+        score = Math.round(score*100)/100;
+        return 'Distance: ' + score + 'm';
     }
 
     function getServerVersion(o) {
