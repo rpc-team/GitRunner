@@ -5,9 +5,14 @@
 module.exports = (function() {
     var settings = require('../../settings');
     var o = {};
+    var assetPath = 'assets/world' + Math.floor(1 + Math.random()*2) + '/';
     var _tiles = {
-        tile_grass: 'assets/grass_128x128.png',
-        tile_sky: 'assets/sky.png'
+        tile_floor: assetPath + 'tl/tl1.png',
+        tile_bkg: assetPath + 'bg/bg.png',
+        tile_obstacle1: assetPath + 'ob/ob1.png',
+        tile_obstacle2: assetPath + 'ob/ob2.png',
+        tile_obstacle3: assetPath + 'ob/ob3.png',
+        tile_obstacle4: assetPath + 'ob/ob4.png'
     };
     var player;
     var state = 'waiting';
@@ -68,7 +73,7 @@ module.exports = (function() {
 
         var serverVersion = this.game.cache.getJSON('server_version');
 
-        var sky = this.game.add.sprite(0, 0, 'sky');
+        var sky = this.game.add.sprite(0, 0, 'tile_bkg');
         sky.width = settings.display.width;
 
         platforms = this.game.add.group();
@@ -90,7 +95,7 @@ module.exports = (function() {
                     level.gaps--;
                     _i += 2;
                 } else {
-                    ground = platforms.create((i-1) * 64, this.game.world.height-64, 'tile_grass');
+                    ground = platforms.create((i-1) * 64, this.game.world.height-64, 'tile_floor');
                     ground.body.immovable = true;
                     ground.scale.set(0.5, 0.5);
                     ground.body.friction.x = 0;
@@ -107,7 +112,7 @@ module.exports = (function() {
 
                     level.obstacles--;
 
-                    obstacle = obstacles.create((i-1) * 64, this.game.world.height-64, 'obstacles');
+                    obstacle = obstacles.create((i-1) * 64, this.game.world.height-64, 'tile_obstacle' + Math.floor(1 + Math.random()*4));
                     obstacle.anchor.set(0, 1);
                     obstacle.scale.set(0.8, 0.8);
                     obstacle.body.immovable = true;
@@ -130,6 +135,7 @@ module.exports = (function() {
         player.animations.add('right', [1, 2, 3, 4], 10, true);
         player.animations.add('jump', [5, 6], 10, true);
         player.animations.add('fall', [0], 10, true);
+        player.health = 100;
 
         // text
         serverLabel = this.game.add.text(8, 8, getServerVersion(serverVersion), {fontSize: '24', fill: '#000' });
@@ -270,7 +276,7 @@ module.exports = (function() {
     }
 
     function getServerVersion(o) {
-        return 'Server version: ' + o.name + ' ' + o.version;
+        return 'Server version: ' + o.name + ' ' + o.version + ' | Health: ' + player.health;
     }
 
     return o;
