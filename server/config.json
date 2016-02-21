@@ -9,5 +9,9 @@
         "debug": false,
         "protocol": "https",
         "userAgent": "GitRunner Backend"
+    },
+    "mongodb": {
+        "host": "localhost",
+        "port": 27017
     }
 }

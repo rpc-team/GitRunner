@@ -4,40 +4,51 @@
 
 module.exports = (function() {
     var settings = require('../../settings');
-    var ProgressPie = require('../progresspie');
     var o = {};
-    var assetPath = 'assets/world' + Math.floor(1 + Math.random()*2) + '/';
-    var _tiles = {
-        tile_floor: assetPath + 'tl/tl1.png',
-        tile_bkg: assetPath + 'bg/bg.png',
-        tile_obstacle1: assetPath + 'ob/ob1.png',
-        tile_obstacle2: assetPath + 'ob/ob2.png',
-        tile_obstacle3: assetPath + 'ob/ob3.png',
-        tile_obstacle4: assetPath + 'ob/ob4.png',
-        tile_monster1: assetPath + 'mo/mo1.png',
-        tile_monster2: assetPath + 'mo/mo2.png',
-        tile_monster3: assetPath + 'mo/mo3.png',
-        tile_monster4: assetPath + 'mo/mo4.png'
-    };
+    var assetPath;
+    var _tiles = {};
     var player;
     var state = 'waiting';
+    // groups
     var platforms, nonCollisionGroup;
     var obstacles, monsters;
-    var level;
+
+    var levelOffset;
+
+    var level, levelGenerationIteration = 1;
     var numJumps = 0;
     var serverLabel, gameOverLabel;
     var deathEmitter, jumpEmitter;
     var scoreText;
     var cursors, spacebar;
     var music, jump, drop, drop_end, soundsEnabled = false;
+    var homeButton;
+    var userName = 'Your Name';
 
     // temporary usage..
     var grayFilter;
 
     var next_position = {};
+    var empty_gaps = [];
+
+    var COLLIDE_ENABLED = false;
 
     o.preload = function() {
         console.log('Selected Character: ' + settings.selectedCharacter);
+
+        assetPath = 'assets/world' + Math.floor(1 + Math.random()*2) + '/';
+        _tiles = {
+            tile_floor: assetPath + 'tl/tl1.png',
+            tile_bkg: assetPath + 'bg/bg.png',
+            tile_obstacle1: assetPath + 'ob/ob1.png',
+            tile_obstacle2: assetPath + 'ob/ob2.png',
+            tile_obstacle3: assetPath + 'ob/ob3.png',
+            tile_obstacle4: assetPath + 'ob/ob4.png',
+            tile_monster1: assetPath + 'mo/mo1.png',
+            tile_monster2: assetPath + 'mo/mo2.png',
+            tile_monster3: assetPath + 'mo/mo3.png',
+            tile_monster4: assetPath + 'mo/mo4.png'
+        };
 
         this.game.stage.backgroundColor = '#000';
 
@@ -50,18 +61,18 @@ module.exports = (function() {
 
         this.load.spritesheet('dude', 'assets/' + settings.selectedCharacter + '.png', 48, 64);
 
-        this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
+        this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/game/start/' + settings.playerID);
 
         // temporary usage..
         this.game.load.script('gray', 'https://cdn.rawgit.com/photonstorm/phaser/master/filters/Gray.js');
     };
 
     o.create = function() {
-        //var pie = new ProgressPie(this.game, this.game.world.centerX, this.game.world.centerY, 32);
-        //
-        //this.game.world.add(pie);
-        //pie.color = '#00F';
-        //pie.progress = 0;
+        console.log('Game.create');
+
+        state = 'waiting';
+        next_position = {};
+        empty_gaps = [];
 
         cursors = this.game.input.keyboard.createCursorKeys();
         cursors.spacebar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -97,93 +108,23 @@ module.exports = (function() {
         monsters = this.game.add.group();
         monsters.enableBody = true;
 
-        var ground, obstacle;
-        var expected_position, min, max, rnd_position, empty_gaps = [];
         // level.gaps = 1500;
-        level.monsters *= 10
-        for ( var i = 1; i <= level.size; i++ ) {
+        levelOffset = Math.floor(256/64);
+        level.size += levelOffset;
+        var levelSize = 20;
+        console.log('level size = ' + level.size);
+        //for ( var i = 1; i <= level.size; i++ ) {
+        for ( levelGenerationIteration = 1; levelGenerationIteration <= levelSize; levelGenerationIteration++ ) {
             if (level.gaps) {
-                expected_position = Math.floor(level.size / level.gaps);
-
-                if(!next_position.gaps) next_position.gaps = expected_position;
-
-                if(i/expected_position === Math.floor(i/expected_position) && next_position.gaps) {
-
-                    if(i === next_position.gaps) {
-                        min = next_position.gaps * 0.9;
-                        max = next_position.gaps * 1.1;
-                        rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
-
-                        if(this.game.world.centerX < rnd_position) {
-                            console.log('generating gap at position: ' + rnd_position);
-
-                            empty_gaps.push(rnd_position / 64);
-                        }
-
-                        next_position.gaps = i + expected_position;
-                    }
-                }
-
-                if((empty_gaps).indexOf(i) === -1) {
-                    ground = platforms.create((i-1) * 64, this.game.world.height-64, 'tile_floor');
-                    ground.body.immovable = true;
-                    ground.scale.set(0.5, 0.5);
-                    ground.body.friction.x = 0;
-                } else {
-                    continue;
-                }
+                o.generateNextGap(levelGenerationIteration, platforms);
             }
 
             if(level.obstacles) {
-                expected_position = Math.floor(level.size / level.obstacles);
-
-                if(i/expected_position === Math.floor(i/expected_position) && next_position.obstacles) {
-                    if(i === next_position.obstacles) {
-                        min = next_position.obstacles * 0.9;
-                        max = next_position.obstacles * 1.1;
-                        rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
-
-                        if(this.game.world.centerX < rnd_position) {
-                            console.log('generating obstacle at position: ' + rnd_position);
-
-                            obstacle = obstacles.create(rnd_position, this.game.world.height - 64, 'tile_obstacle' + Math.floor(1 + Math.random()*4));
-                            obstacle.body.setSize(obstacle.width * 0.8, obstacle.height * 0.8, obstacle.width * 0.1, obstacle.height * 0.1);
-                            obstacle.anchor.set(0, 1);
-                            obstacle.body.immovable = true;
-                        }
-                    }
-
-                    next_position.obstacles = i + expected_position;
-                } else if(!next_position.obstacles) {
-                    next_position.obstacles = expected_position;
-                }
+                o.generateNextObstacle(levelGenerationIteration, obstacles);
             }
 
             if(level.monsters) {
-                expected_position = Math.floor(level.size / level.monsters);
-
-                if(i/expected_position === Math.floor(i/expected_position) && next_position.monsters) {
-                    if(i === next_position.monsters) {
-                        min = next_position.monsters * 0.9;
-                        max = next_position.monsters * 1.1;
-                        rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
-
-                        if(this.game.world.centerX < rnd_position) {
-                            console.log('generating monster at position: ' + rnd_position);
-
-                            monster = monsters.create(rnd_position, this.game.world.height - 64, 'tile_monster' + Math.floor(1 + Math.random()*4));
-                            monster.body.setSize(monster.width * 0.8, monster.height * 0.8, monster.width * 0.1, monster.height * 0.1);
-                            monster.anchor.set(0, 1);
-                            monster.body.immovable = true;
-
-                            this.game.add.tween(monster).to({ y: this.game.world.height - monster.height * 2 }, 300, Phaser.Easing.Sinusoidal.Out, true, 0, -1, true)
-                        }
-                    }
-
-                    next_position.monsters = i + expected_position;
-                } else if (!next_position.monsters) {
-                    next_position.monsters = expected_position;
-                }
+                o.generateNextMonster(levelGenerationIteration, monsters);
             }
         }
 
@@ -191,8 +132,8 @@ module.exports = (function() {
         var signpost = nonCollisionGroup.create(64, this.game.world.height-64, 'signpost');
         signpost.anchor.set(0, 1);
         var avatar = nonCollisionGroup.create(signpost.x + 18, 245, 'repo-avatar');
-        avatar.scale.set(1, 0.8);
-        avatar.alpha = 0.7;
+        avatar.width = 200;
+        avatar.height = 165;
 
         // create the player
         player = this.game.add.sprite(256, 0, 'dude');
@@ -207,7 +148,7 @@ module.exports = (function() {
 
         // text
         serverLabel = this.game.add.text(8, 8, getServerVersion(serverVersion), {fontSize: '24', fill: '#000' });
-        gameOverLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY, 'Game Over', {font: 'bold 96pt arial', fill: '#F00'});
+        gameOverLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY-100, 'Game Over', {font: 'bold 96pt arial', fill: '#F00'});
         gameOverLabel.anchor.set(0.5);
         gameOverLabel.visible = false;
         scoreText = this.game.add.text(0, 0, returnCurrentScore(0), {
@@ -229,8 +170,16 @@ module.exports = (function() {
         deathEmitter.makeParticles('heart');
         deathEmitter.gravity = 300;
 
-        startButton = this.game.add.button(this.game.world.width - 60, 30, 'diamond', playPauseSound, this);
+        this.game.add.button(this.game.world.width - 60, 30, 'diamond', playPauseSound, this);
+
+        homeButton = this.game.add.button(this.game.world.centerX - 256, this.game.world.centerY, 'home_button', backToMainMenu, this);
+        homeButton.scale.set(0.5);
+        homeButton.visible = false;
     };
+
+    function backToMainMenu() {
+        this.state.start('mainmenu');
+    }
 
     o.update = function() {
         if (!music.isPlaying && soundsEnabled) {
@@ -248,22 +197,125 @@ module.exports = (function() {
                 break;
 
             case 'running':
-                if ( !this.game.physics.arcade.collide(player, obstacles, onObstacleCollide) ) {
+                if ( !COLLIDE_ENABLED || (COLLIDE_ENABLED && !this.game.physics.arcade.collide(player, obstacles, onObstacleCollide)) ) {
                     this.run();
                 }
                 break;
 
             case 'dead':
-                gameOverLabel.visible = true;
-                var scale = player.scale;
-                if ( scale.x > 0 ) {
-                    scale.x -= 0.05;
-                    scale.y -= 0.05;
-                    player.scale = scale;
-                }
+                this.gameOver();
                 break;
         }
     };
+
+    o.generateNextGap = function(i, platforms, runSpeed) {
+        var min, max, rnd_position, expected_position, ground;
+
+        runSpeed = runSpeed || 0;
+
+        expected_position = Math.floor((level.size-levelOffset) / level.gaps);
+
+        if(!next_position.gaps) next_position.gaps = expected_position;
+
+        //if(i/expected_position === Math.floor(i/expected_position) && next_position.gaps) {
+        //
+        //    if(i === next_position.gaps) {
+        //        min = next_position.gaps * 0.9;
+        //        max = next_position.gaps * 1.1;
+        //        rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
+        //
+        //        if(this.game.world.centerX < rnd_position) {
+        //            console.log('generating gap at position: ' + rnd_position);
+        //
+        //            empty_gaps.push(rnd_position / 64);
+        //        }
+        //
+        //        next_position.gaps = i + expected_position;
+        //    }
+        //}
+        //
+        //if((empty_gaps).indexOf(i) === -1) {
+        //    ground = platforms.create((i-1) * 64, this.game.world.height-64, 'tile_floor');
+        //    ground.body.immovable = true;
+        //    ground.scale.set(0.5, 0.5);
+        //    ground.body.friction.x = 0;
+        //}
+        var lastChild = platforms.children[i-2];
+        var nextX = lastChild ? lastChild.x + lastChild.width - Math.ceil(runSpeed/64) - 2: (i-1) * 64;
+        //ground = platforms.create((i-1) * 64, this.game.world.height-64, 'tile_floor');
+        ground = platforms.create(nextX, this.game.world.height-64, 'tile_floor');
+        ground.body.immovable = true;
+        ground.scale.set(0.5, 0.5);
+        ground.body.friction.x = 0;
+    };
+
+    o.generateNextObstacle = function(i, obstacles) {
+        var min, max, rnd_position, expected_position, obstacle;
+
+        level.obstaclesCreated = level.obstaclesCreated || 0;
+        if ( level.obstaclesCreated < level.obstacles ) {
+            expected_position = Math.floor((level.size-levelOffset) / level.obstacles);
+
+            if(i/expected_position === Math.floor(i/expected_position) && next_position.obstacles) {
+                if(i === next_position.obstacles) {
+                    min = next_position.obstacles * 0.9;
+                    max = next_position.obstacles * 1.1;
+
+                    if ( max > level.size ) max = level.size-1;
+
+                    rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
+
+                    if(this.game.world.centerX < rnd_position) {
+                        console.log('generating obstacle at position: ' + rnd_position);
+
+                        obstacle = obstacles.create(rnd_position, this.game.world.height - 64, 'tile_obstacle' + Math.floor(1 + Math.random()*4));
+                        obstacle.body.setSize(obstacle.width * 0.8, obstacle.height * 0.8, obstacle.width * 0.1, obstacle.height * 0.1);
+                        obstacle.anchor.set(0, 1);
+                        obstacle.body.immovable = true;
+                        level.obstaclesCreated++;
+                    }
+                }
+
+                next_position.obstacles = i + expected_position;
+            } else if(!next_position.obstacles) {
+                next_position.obstacles = expected_position;
+            }
+
+        }
+    };
+
+    o.generateNextMonster = function(i, monsters) {
+        var min, max, rnd_position, expected_position, monster;
+
+        level.monstersCreated = level.monstersCreated || 0;
+        if ( level.monstersCreated < level.monsters ) {
+            expected_position = Math.floor((level.size-levelOffset) / level.monsters);
+
+            if(i/expected_position === Math.floor(i/expected_position) && next_position.monsters) {
+                if(i === next_position.monsters) {
+                    min = next_position.monsters * 0.9;
+                    max = next_position.monsters * 1.1;
+                    rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
+
+                    if(this.game.world.centerX < rnd_position) {
+                        console.log('generating monster at position: ' + rnd_position);
+
+                        monster = monsters.create(rnd_position, this.game.world.height - 64, 'tile_monster' + Math.floor(1 + Math.random()*4));
+                        monster.body.setSize(monster.width * 0.8, monster.height * 0.8, monster.width * 0.1, monster.height * 0.1);
+                        monster.anchor.set(0, 1);
+                        monster.body.immovable = true;
+
+                        this.game.add.tween(monster).to({ y: this.game.world.height - monster.height * 2 }, 300, Phaser.Easing.Sinusoidal.Out, true, 0, -1, true)
+                        level.monstersCreated++;
+                    }
+                }
+
+                next_position.monsters = i + expected_position;
+            } else if (!next_position.monsters) {
+                next_position.monsters = expected_position;
+            }
+        }
+    }
 
     function onObstacleCollide(player, obstacle) {
         killPlayer();
@@ -283,21 +335,45 @@ module.exports = (function() {
 
     o.run = function() {
         var isJumping = !player.body.touching.down;
-        var runSpeed = 200;
+        var runSpeed = 250;
 
         runSpeed += Math.abs(platforms.children[0].x) / 64;
 
-        updateRunnerSpeedTo(runSpeed);
+        this.lastTime = this.lastTime || this.game.time.now;
 
-        if (player.body.bottom >= settings.display.height || player.body.touching.right) {
-            // kill the player and end the game
-            killPlayer();
-            return;
+        if ( this.lastTime >= this.game.time.now ) {
+            if ( levelGenerationIteration < level.size ) {
+                if (level.gaps) {
+                    o.generateNextGap(levelGenerationIteration, platforms, runSpeed);
+                }
+
+                if(level.obstacles) {
+                    o.generateNextObstacle(levelGenerationIteration, obstacles);
+                }
+
+                if(level.monsters) {
+                    o.generateNextMonster(levelGenerationIteration, monsters);
+                }
+                levelGenerationIteration++;
+            }
         }
 
-        if ( this.game.physics.arcade.collide(player, monsters, onMonsterCollide) ) {
-            if ( state == 'dead' ) {
+        this.lastTime = this.game.time.now + 100;
+
+
+        updateRunnerSpeedTo(runSpeed);
+
+        if ( COLLIDE_ENABLED ) {
+            if ( (player.body.bottom >= settings.display.height || player.body.touching.right) ) {
+                // kill the player and end the game
+                killPlayer();
                 return;
+            }
+
+            if ( this.game.physics.arcade.collide(player, monsters, onMonsterCollide) ) {
+                if ( state == 'dead' ) {
+                    return;
+                }
             }
         }
 
@@ -316,7 +392,7 @@ module.exports = (function() {
                 jumpEmitter.start(true, 1000, null, 15);
             }
         }
-        if (cursors.down.isDown) {
+        if (cursors.down.isDown && player.body.velocity.y > -150 ) {
             player.body.velocity.y = 800;
         }
 
@@ -325,6 +401,17 @@ module.exports = (function() {
         } else {
             player.animations.play('right');
             numJumps = 0;
+        }
+    };
+
+    o.gameOver = function() {
+        homeButton.visible = true;
+        gameOverLabel.visible = true;
+        var scale = player.scale;
+        if ( scale.x > 0 ) {
+            scale.x -= 0.05;
+            scale.y -= 0.05;
+            player.scale = scale;
         }
     };
 
@@ -364,6 +451,11 @@ module.exports = (function() {
         deathEmitter.x = player.worldPosition.x + player.width/2;
         deathEmitter.y = player.worldPosition.y + player.height/2;
         deathEmitter.start(true, 2000, null, 15);
+
+        userName = window.prompt('Enter your name for the leaderboard', userName);
+
+        // TODO: Send end-of-game report to the server
+
     }
 
     function returnCurrentScore(score) {

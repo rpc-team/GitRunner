@@ -3,7 +3,43 @@ var base64Encode = require('base64-stream').encode;
 
 var github;
 
-function parseGitHubStats(res, owner, repository) {
+var config = require('../config');
+
+var MongoClient = require('mongodb').MongoClient;
+var ObjectId = require('mongodb').ObjectID;
+var url = "mongodb://"+ config.mongodb.host+":"+config.mongodb.port+"/gitrunner";
+
+var db;
+
+MongoClient.connect(url, function(err, _db) {
+    if (!err && _db) {
+        db = _db;
+    } else {
+        throw "Could not connect to mongo";
+    }
+});
+
+function generateID() {
+    function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+    }
+
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+        s4() + '-' + s4() + s4() + s4();
+};
+
+function getStartLevel(){
+    return ['rpc-team', 'GitRunner'];
+    //return ['Odobo', 'odobox'];
+}
+
+function getNextLevel(prevOwner, prevRepo){
+    return ['vert-x3', 'vertx-lang-js'];
+}
+
+function parseGitHubStats(playerID, gameID, owner, repository, res) {
     new Promise(function(resolve, reject) {
         github.repos.get({
             user: owner,
@@ -72,8 +108,19 @@ function parseGitHubStats(res, owner, repository) {
 
                     Object.keys(allData.languages).map(function(v) { if(allData.languages[v] > maxLangSize) maxLangSize = allData.languages[v]; });
 
+                    //function returnBestRepoSize(size){
+                    //    var minSize = (Math.floor(maxLangSize / 1024) + allData.repo.subscribers_count) * 5;
+                    //    var maxSize = 2500;
+                    //    if(size > 2500) {
+                    //        return
+                    //    }
+                    //}
+
+
                     var data = {
-                        size: allData.repo.size,
+                        playerID: playerID,
+                        gameID: gameID,
+                        size: (Math.floor(maxLangSize / 1024) + allData.repo.subscribers_count) * 5,
                         obstacles: Math.floor(maxLangSize / 1024),
                         monsters: allData.repo.subscribers_count,
                         gaps: Object.keys(allData.branches).length,
@@ -82,7 +129,13 @@ function parseGitHubStats(res, owner, repository) {
                         avatar: 'data:' + contentType + ';base64,' + imgb64
                     };
 
-                    res.send(data);
+                    db.collection('gameplay').updateOne({ "_id" : playerID + "_" + gameID }, { $inc: { "maxScoreSize": data.size }}, function(err, result) {
+                        if(!err) {
+                            res.send(data);
+                        } else {
+                            res.status(500).send({ message: 'Failed to update gameplay into db' });
+                        }
+                    });
                 });
             }
         });
@@ -117,18 +170,56 @@ module.exports = function() {
                 res.send({ message: 'OK', data: data });
             });
         },
-        level: function(req, res) {
-            var level;
+        startLevel: function(req, res) {
+            var playerID = req.params.playerID;
+            var gameID = generateID();
+            var level = getStartLevel();
 
-            // if level not specified, pick one ..
-            // TODO: create an algorithm to fetch a random repo and replace the hardcoded values
-            if(req.params.level) {
-                level = req.params.level.split(':');
+            var gameplayDoc = {
+                "_id": playerID + "_" + gameID,
+                "playerID": playerID,
+                "gameID": gameID,
+                "score": 0,
+                "maxScoreSize": 0,
+                "levels": [level]
+            };
+
+            db.collection('gameplay').insertOne(gameplayDoc, function(err, result) {
+                if(!err) {
+                    parseGitHubStats(playerID, gameID, level[0], level[1], res);
+                } else {
+                    res.status(500).send({ message: 'Failed to save gameplay into db' });
+                }
+            });
+        },
+        nextLevel: function(req, res) {
+            var playerID = req.params.playerID;
+            var gameID = req.params.gameID;
+            var level = getNextLevel();  //TODO to be decided if we put here the last level played or we make any connections for them, one option is to randomly select from an array of preset repos
+
+            parseGitHubStats(playerID, gameID, level[0], level[1], res);
+        },
+        score: function(req, res){
+            var body = req.body;
+
+            if(body && body.playerID && body.nickname && body.gameID && body.score){
+                if(isScoreValid(body)){
+                    var insertDocument = function(db, callback) {
+                        db.collection('gameplay').insertOne( {} )
+                    }
+                } else {
+                    return res.status(403).send({ message: 'Score Invalid'});
+                }
             } else {
-                level = ['vert-x3', 'vertx-lang-js'];
+                return res.status(400).send({ message: 'Bad Request'});
             }
 
-            parseGitHubStats(res, level[0], level[1]);
+
+
+            function isScoreValid(params){
+                //TODO insert validation of parameters + minimal security tests for the validity of the score
+                return true;
+            };
         }
     };
 }();

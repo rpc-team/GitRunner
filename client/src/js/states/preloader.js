@@ -12,7 +12,8 @@ module.exports = (function() {
         heart: 'assets/heart.png',
         star: 'assets/star.png',
         signpost: 'assets/avatar.png',
-        mainmenu_bkg: 'assets/mm_bg.png'
+        mainmenu_bkg: 'assets/mm_bg.png',
+        home_button: 'assets/btn_home.png'
         //btn_crissy_normal: 'assets/mm_c3_off.png',
         //btn_peter_normal: 'assets/mm_c2_off.png',
         //btn_ricardo_normal: 'assets/mm_c1_off.png',

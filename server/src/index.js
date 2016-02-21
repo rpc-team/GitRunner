@@ -20,7 +20,13 @@ app.exposeEndpoints = function() {
 
     app.get('/health', handlers.health);
 
-    app.get('/player/:playerId/level/:level?', handlers.level);
+    //app.get('/player/:playerId/level/:level?', handlers.level);
+
+    app.get('/game/start/:playerID', handlers.startLevel);
+
+    app.get('/game/next/:gameID/:playerID', handlers.nextLevel);
+
+    app.post('/score', handlers.score);
 };
 
 app.initGitHub = function() {
