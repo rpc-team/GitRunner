@@ -63,7 +63,7 @@ module.exports = (function() {
             this.load.spritesheet(k, _spritesheets[k].file, _spritesheets[k].width, _spritesheets[k].height);
         }
 
-        this.game.load.json('server_version', 'http://' + settings.server.host + ':' + settings.server.port + '/version');
+        this.game.load.json('server_version', 'http://' + process.env.GITRUNNER_BACKEND_HOST + '/version');
     };
 
     o.create = function() {
