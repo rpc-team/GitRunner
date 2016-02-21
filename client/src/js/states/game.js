@@ -49,7 +49,7 @@ module.exports = (function() {
 
         this.load.spritesheet('dude', 'assets/' + settings.selectedCharacter + '.png', 48, 64);
 
-        this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
+        this.game.load.json('level', 'http://' + process.env.GITRUNNER_BACKEND_HOST + '/player/' + settings.playerID + '/level');
 
         this.game.load.audio('guitar', 'assets/sounds/guitar.ogg');
         this.game.load.audio('jump', 'assets/sounds/jump.ogg');
