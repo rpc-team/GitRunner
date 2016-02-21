@@ -40,6 +40,10 @@ module.exports = (function() {
 
         level = this.game.cache.getJSON('level');
 
+        var imgData = new Image();
+        imgData.src = level.avatar;
+        this.game.cache.addImage('repo-avatar', level.avatar, imgData);
+
         var serverVersion = this.game.cache.getJSON('server_version');
 
         var sky = this.game.add.sprite(0, 0, 'sky');
@@ -85,6 +89,11 @@ module.exports = (function() {
 
             i = _i;
         }
+
+        // create the avatar image
+        //this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'repo-avatar');
+        var avatar = platforms.create(this.game.world.centerX, 64, 'repo-avatar');
+        avatar.scale.set(0.5, 0.5);
 
         // create the player
         player = this.game.add.sprite(256, 0, 'dude');
@@ -163,7 +172,7 @@ module.exports = (function() {
             // enable a single and double jump.
             // doubleJumps are only allowed on a certain part of the initial jump arc
             if ( player.body.velocity.y > -100 && numJumps < 1 ) {
-                player.body.velocity.y = -350;
+                player.body.velocity.y = -250;
                 numJumps++;
             }
         }
