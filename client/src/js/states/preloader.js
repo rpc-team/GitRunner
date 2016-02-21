@@ -11,7 +11,6 @@ module.exports = (function() {
         diamond: 'assets/diamond.png',
         heart: 'assets/heart.png',
         star: 'assets/star.png',
-        obstacles: 'assets/rock.png'
     };
     var _spritesheets = {
         baddie: {
