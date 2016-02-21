@@ -31,8 +31,6 @@ module.exports = (function() {
     var rnd_position, next_position;
 
     o.preload = function() {
-        console.log('Game.preload');
-
         console.log('Selected Character: ' + settings.selectedCharacter);
 
         this.game.stage.backgroundColor = '#000';
@@ -58,8 +56,6 @@ module.exports = (function() {
     };
 
     o.create = function() {
-        console.log('Game.create');
-
         cursors = this.game.input.keyboard.createCursorKeys();
         cursors.spacebar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 

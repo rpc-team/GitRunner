@@ -37,10 +37,6 @@ module.exports = (function() {
     }
 
     o.update = function() {
-        console.log('MainMenu.update');
-        //dude.animations.play('right');
-        //baddie.animations.play('left');
-
         var curScale = startButton.scale;
         curScale.x += 0.02 * direction
         curScale.y += 0.02 * direction;

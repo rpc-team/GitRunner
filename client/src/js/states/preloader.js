@@ -12,9 +12,9 @@ module.exports = (function() {
         heart: 'assets/heart.png',
         star: 'assets/star.png',
         signpost: 'assets/avatar.png',
-        btn_crissy: 'assets/diamong.png',
-        btn_peter: 'assets/diamong.png',
-        btn_ricardo: 'assets/diamong.png',
+        btn_crissy: 'assets/diamond.png',
+        btn_peter: 'assets/diamond.png',
+        btn_ricardo: 'assets/diamond.png'
     };
     var _spritesheets = {
         baddie: {
