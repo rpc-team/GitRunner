@@ -174,7 +174,7 @@ module.exports = (function() {
                             monster.anchor.set(0, 1);
                             monster.body.immovable = true;
 
-                            this.game.add.tween(monster).to({ y: this.game.world.height - monster.height * 2 }, 250, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true)
+                            this.game.add.tween(monster).to({ y: this.game.world.height - monster.height * 2 }, 300, Phaser.Easing.Sinusoidal.Out, true, 0, -1, true)
                         }
                     }
 
