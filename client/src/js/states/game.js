@@ -88,17 +88,17 @@ module.exports = (function() {
             if(level.obstacles) {
                 expected_position = Math.floor(level.size / level.obstacles);
                 rnd_position = i + Math.floor(Math.random() * ((expected_position + 5) - (expected_position - 5)) + (expected_position - 5));
-                console.log(i, rnd_position);
+                //console.log(i, rnd_position);
 
                 if(i === rnd_position) {
                     console.log('generating obstacle at position: ' + i * 64);
 
                     level.obstacles--;
 
-                    obstacle = obstacles.create((i-1) * 64, this.game.world.height-135, 'obstacles');
+                    obstacle = obstacles.create((i-1) * 64, this.game.world.height-64, 'obstacles');
+                    obstacle.anchor.set(0, 1);
+                    obstacle.scale.set(0.8, 0.8);
                     obstacle.body.immovable = true;
-                    obstacle.scale.set(0.5, 0.5);
-                    obstacle.body.friction.x = 0;
                 }
             }
 
