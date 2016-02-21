@@ -33,6 +33,8 @@ module.exports = (function() {
     o.preload = function() {
         console.log('Game.preload');
 
+        console.log('Selected Character: ' + settings.selectedCharacter);
+
         this.game.stage.backgroundColor = '#000';
 
         // load images
@@ -41,6 +43,8 @@ module.exports = (function() {
                 this.load.image(k, _tiles[k]);
             }
         }
+
+        this.load.spritesheet('dude', 'assets/' + settings.selectedCharacter + '.png', 48, 64);
 
         this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
 
