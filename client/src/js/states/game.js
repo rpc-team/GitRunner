@@ -32,6 +32,7 @@ module.exports = (function() {
     var scoreText;
     var cursors, spacebar;
     var music, jump, drop, drop_end, soundsEnabled = false;
+    var homeButton;
 
     // temporary usage..
     var grayFilter;
@@ -163,7 +164,15 @@ module.exports = (function() {
         deathEmitter.gravity = 300;
 
         this.game.add.button(this.game.world.width - 60, 30, 'diamond', playPauseSound, this);
+
+        homeButton = this.game.add.button(this.game.world.centerX - 256, this.game.world.centerY, 'home_button', backToMainMenu, this);
+        homeButton.scale.set(0.5);
+        homeButton.visible = false;
     };
+
+    function backToMainMenu() {
+        this.state.start('mainmenu');
+    }
 
     o.update = function() {
         if (!music.isPlaying && soundsEnabled) {
@@ -377,6 +386,7 @@ module.exports = (function() {
     };
 
     o.gameOver = function() {
+        homeButton.visible = true;
         gameOverLabel.visible = true;
         var scale = player.scale;
         if ( scale.x > 0 ) {
