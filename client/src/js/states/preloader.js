@@ -20,7 +20,7 @@ module.exports = (function() {
             height: 32
         },
         dude: {
-            file: 'assets/criss.png',
+            file: 'assets/peter.png',
             width: 48,
             height: 64
         }

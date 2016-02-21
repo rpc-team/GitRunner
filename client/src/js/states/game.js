@@ -30,7 +30,9 @@ module.exports = (function() {
 
         // load images
         for (var k in _tiles) {
-            this.load.image(k, _tiles[k]);
+            if (_tiles.hasOwnProperty(k) ) {
+                this.load.image(k, _tiles[k]);
+            }
         }
 
         this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
@@ -116,7 +118,6 @@ module.exports = (function() {
         }
 
         // create the avatar image
-        //this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'repo-avatar');
         var avatar = platforms.create(this.game.world.centerX, 64, 'repo-avatar');
         avatar.scale.set(0.5, 0.5);
 
@@ -137,11 +138,9 @@ module.exports = (function() {
         gameOverLabel.visible = false;
         scoreText = this.game.add.text(0, 0, returnCurrentScore(0), {
             font: '30px Arial',
-            fill: '#000',
             align: 'center',
             boundsAlignH: 'left',
-            boundsAlignV: 'top',
-            backgroundColor: '#999'
+            boundsAlignV: 'top'
         });
         scoreText.setTextBounds(50, 30, 150, 0);
 
@@ -209,7 +208,7 @@ module.exports = (function() {
             killPlayer();
         }
 
-        scoreText.setText(returnCurrentScore(parseInt(runSpeed)));
+        scoreText.setText(returnCurrentScore(0-platforms.children[0].worldPosition.x / 64));
 
         if (cursors.up.isDown || cursors.spacebar.isDown) {
             // enable a single and double jump.
@@ -266,7 +265,8 @@ module.exports = (function() {
     }
 
     function returnCurrentScore(score) {
-        return 'Score: ' + score;
+        score = Math.round(score*100)/100;
+        return 'Distance: ' + score + 'm';
     }
 
     function getServerVersion(o) {
