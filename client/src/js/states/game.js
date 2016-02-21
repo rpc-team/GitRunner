@@ -274,6 +274,7 @@ module.exports = (function() {
     }
 
     function updateRunnerSpeedTo(speed) {
+        speed = speed < 550 ? speed : 550;
         platforms.forEach(function(ground) {
             ground.body.velocity.x = -speed;
         }, this);
