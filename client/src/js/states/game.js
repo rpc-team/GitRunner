@@ -153,7 +153,7 @@ module.exports = (function() {
             drop.play();
         }
         this.game.physics.arcade.collide(player, platforms);
-        this.game.physics.arcade.collide(player, obstacles);
+        this.game.physics.arcade.collide(player, obstacles, onObstacleCollide);
         switch (state) {
             case 'waiting':
                 if (player.body.touching.down) {
@@ -177,6 +177,10 @@ module.exports = (function() {
                 break;
         }
     };
+
+    function onObstacleCollide(player, obstacle) {
+        killPlayer();
+    }
 
     o.run = function() {
         var isJumping = !player.body.touching.down;
