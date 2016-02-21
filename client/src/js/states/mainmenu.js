@@ -34,7 +34,7 @@ module.exports = (function() {
         //startButton.anchor.set(0.5);
 
         // text
-        serverLabel = this.game.add.text(8, settings.display.height - 16, getServerVersion(serverVersion), {fontSize: '24', fill: '#000' })
+        serverLabel = this.game.add.text(8, settings.display.height - 16, getServerVersion(serverVersion), {fontSize: '24', fill: '#000' });
     };
 
     function onSelectCharacter(charName) {

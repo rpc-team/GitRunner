@@ -12,23 +12,28 @@ module.exports = (function() {
         tile_obstacle1: assetPath + 'ob/ob1.png',
         tile_obstacle2: assetPath + 'ob/ob2.png',
         tile_obstacle3: assetPath + 'ob/ob3.png',
-        tile_obstacle4: assetPath + 'ob/ob4.png'
+        tile_obstacle4: assetPath + 'ob/ob4.png',
+        tile_monster1: assetPath + 'mo/mo1.png',
+        tile_monster2: assetPath + 'mo/mo2.png',
+        tile_monster3: assetPath + 'mo/mo3.png',
+        tile_monster4: assetPath + 'mo/mo4.png'
     };
     var player;
     var state = 'waiting';
     var platforms, nonCollisionGroup;
+    var obstacles, monsters;
     var level;
     var numJumps = 0;
     var serverLabel, gameOverLabel;
     var deathEmitter, jumpEmitter;
     var scoreText;
     var cursors, spacebar;
-    var music, jump, drop, drop_end, soundsEnabled = true;
+    var music, jump, drop, drop_end, soundsEnabled = false;
 
     // temporary usage..
     var grayFilter;
 
-    var rnd_position, next_position;
+    var next_position = {};
 
     o.preload = function() {
         console.log('Selected Character: ' + settings.selectedCharacter);
@@ -87,62 +92,102 @@ module.exports = (function() {
         obstacles = this.game.add.group();
         obstacles.enableBody = true;
 
+        monsters = this.game.add.group();
+        monsters.enableBody = true;
+
         var ground, obstacle;
+        var expected_position, min, max, rnd_position, empty_gaps = [];
+        // level.gaps = 1500;
+        level.monsters *= 10
         for ( var i = 1; i <= level.size; i++ ) {
-            var _i = i, expected_position;
             if (level.gaps) {
                 expected_position = Math.floor(level.size / level.gaps);
-                if(expected_position * 64 < 300 || this.game.world.centerX > expected_position * 64) level.obstacles--;
 
-                if(i == expected_position) {
-                    console.log('generating gap at position: ' + i * 64);
+                if(!next_position.gaps) next_position.gaps = expected_position;
 
-                    level.gaps--;
-                    _i += 2;
-                } else {
+                if(i/expected_position === Math.floor(i/expected_position) && next_position.gaps) {
+
+                    if(i === next_position.gaps) {
+                        min = next_position.gaps * 0.9;
+                        max = next_position.gaps * 1.1;
+                        rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
+
+                        if(this.game.world.centerX < rnd_position) {
+                            console.log('generating gap at position: ' + rnd_position);
+
+                            empty_gaps.push(rnd_position / 64);
+                        }
+
+                        next_position.gaps = i + expected_position;
+                    }
+                }
+
+                if((empty_gaps).indexOf(i) === -1) {
                     ground = platforms.create((i-1) * 64, this.game.world.height-64, 'tile_floor');
                     ground.body.immovable = true;
                     ground.scale.set(0.5, 0.5);
                     ground.body.friction.x = 0;
+                } else {
+                    continue;
                 }
             }
 
             if(level.obstacles) {
                 expected_position = Math.floor(level.size / level.obstacles);
 
-                if(i/expected_position === Math.floor(i/expected_position) && next_position) {
-                    if(i === next_position) {
-                        var min = next_position * 0.9, max = next_position * 1.1;
+                if(i/expected_position === Math.floor(i/expected_position) && next_position.obstacles) {
+                    if(i === next_position.obstacles) {
+                        min = next_position.obstacles * 0.9;
+                        max = next_position.obstacles * 1.1;
                         rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
 
-                        console.log(this.game.world.centerX, expected_position, rnd_position)
                         if(this.game.world.centerX < rnd_position) {
                             console.log('generating obstacle at position: ' + rnd_position);
 
                             obstacle = obstacles.create(rnd_position, this.game.world.height - 64, 'tile_obstacle' + Math.floor(1 + Math.random()*4));
-                            obstacle.body.setSize(obstacle.width*0.8, obstacle.height*0.8, obstacle.width*0.1, obstacle.height*0.1);
+                            obstacle.body.setSize(obstacle.width * 0.8, obstacle.height * 0.8, obstacle.width * 0.1, obstacle.height * 0.1);
                             obstacle.anchor.set(0, 1);
                             obstacle.body.immovable = true;
                         }
                     }
 
-                    next_position = _i + expected_position;
-                } else if(!next_position) {
-                    next_position = expected_position;
-                    obstacle = obstacles.create((i-1) * 64, this.game.world.height-64, 'tile_obstacle' + Math.floor(1 + Math.random()*4));
-                    obstacle.body.setSize(obstacle.width*0.8, obstacle.height*0.8, obstacle.width*0.1, obstacle.height*0.1);
-                    obstacle.anchor.set(0, 1);
-                    obstacle.body.immovable = true;
+                    next_position.obstacles = i + expected_position;
+                } else if(!next_position.obstacles) {
+                    next_position.obstacles = expected_position;
                 }
             }
 
-            i = _i;
+            if(level.monsters) {
+                expected_position = Math.floor(level.size / level.monsters);
+
+                if(i/expected_position === Math.floor(i/expected_position) && next_position.monsters) {
+                    if(i === next_position.monsters) {
+                        min = next_position.monsters * 0.9;
+                        max = next_position.monsters * 1.1;
+                        rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
+
+                        if(this.game.world.centerX < rnd_position) {
+                            console.log('generating monster at position: ' + rnd_position);
+
+                            monster = monsters.create(rnd_position, this.game.world.height - 64, 'tile_monster' + Math.floor(1 + Math.random()*4));
+                            monster.body.setSize(monster.width * 0.8, monster.height * 0.8, monster.width * 0.1, monster.height * 0.1);
+                            monster.anchor.set(0, 1);
+                            monster.body.immovable = true;
+
+                            this.game.add.tween(monster).to({ y: this.game.world.height - monster.height * 2 }, 300, Phaser.Easing.Sinusoidal.Out, true, 0, -1, true)
+                        }
+                    }
+
+                    next_position.monsters = i + expected_position;
+                } else if (!next_position.monsters) {
+                    next_position.monsters = expected_position;
+                }
+            }
         }
 
         // create the avatar image
         var signpost = nonCollisionGroup.create(64, this.game.world.height-64, 'signpost');
         signpost.anchor.set(0, 1);
-        console.log(signpost);
         var avatar = nonCollisionGroup.create(signpost.x + 18, 245, 'repo-avatar');
         avatar.scale.set(1, 0.8);
         avatar.alpha = 0.7;
@@ -201,7 +246,7 @@ module.exports = (function() {
                 break;
 
             case 'running':
-                if ( !this.game.physics.arcade.collide(player, obstacles, onObstacleCollide) ) {
+                if ( !this.game.physics.arcade.collide(player, obstacles, onObstacleCollide) || !this.game.physics.arcade.collide(player, monsters, onObstacleCollide) ) {
                     this.run();
                 }
                 break;
@@ -281,6 +326,10 @@ module.exports = (function() {
 
         obstacles.forEach(function(obstacle) {
             obstacle.body.velocity.x = -speed;
+        }, this);
+
+        monsters.forEach(function(monster) {
+            monster.body.velocity.x = -speed;
         }, this);
 
         nonCollisionGroup.forEach(function(o) {
