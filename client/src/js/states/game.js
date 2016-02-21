@@ -270,7 +270,9 @@ module.exports = (function() {
     }
 
     function onMonsterCollide(player, monster) {
-        if ( player.body.touching.bottom ) {
+        //console.log('Player: ' + JSON.stringify(player.body.touching));
+        //console.log('Monster: ' + JSON.stringify(monster.body.touching));
+        if ( (player.body.touching.down || player.body.touching.up) && !player.body.touching.right ) {
             player.body.velocity.y = -500;
             numJumps = 0;
             monster.kill();
