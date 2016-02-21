@@ -113,6 +113,7 @@ module.exports = (function() {
                     level.obstacles--;
 
                     obstacle = obstacles.create((i-1) * 64, this.game.world.height-64, 'tile_obstacle' + Math.floor(1 + Math.random()*4));
+                    obstacle.body.setSize(obstacle.width*0.8, obstacle.height*0.8, obstacle.width*0.1, obstacle.height*0.1);
                     obstacle.anchor.set(0, 1);
                     //obstacle.scale.set(64 / obstacle.width, 64/obstacle.height);
                     obstacle.body.immovable = true;
