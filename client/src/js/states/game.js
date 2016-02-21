@@ -33,6 +33,7 @@ module.exports = (function() {
     var cursors, spacebar;
     var music, jump, drop, drop_end, soundsEnabled = false;
     var homeButton;
+    var userName = 'Your Name';
 
     // temporary usage..
     var grayFilter;
@@ -432,6 +433,11 @@ module.exports = (function() {
         deathEmitter.x = player.worldPosition.x + player.width/2;
         deathEmitter.y = player.worldPosition.y + player.height/2;
         deathEmitter.start(true, 2000, null, 15);
+
+        userName = window.prompt('Enter your name for the leaderboard', userName);
+
+        // TODO: Send end-of-game report to the server
+
     }
 
     function returnCurrentScore(score) {
