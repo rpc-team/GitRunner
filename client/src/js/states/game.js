@@ -28,6 +28,8 @@ module.exports = (function() {
     // temporary usage..
     var grayFilter;
 
+    var rnd_position, next_position;
+
     o.preload = function() {
         console.log('Game.preload');
 
@@ -90,7 +92,7 @@ module.exports = (function() {
             var _i = i, expected_position;
             if (level.gaps) {
                 expected_position = Math.floor(level.size / level.gaps);
-                if(expected_position * 64 < 300) level.obstacles--;
+                if(expected_position * 64 < 300 || this.game.world.centerX > expected_position * 64) level.obstacles--;
 
                 if(i == expected_position) {
                     console.log('generating gap at position: ' + i * 64);
@@ -107,14 +109,26 @@ module.exports = (function() {
 
             if(level.obstacles) {
                 expected_position = Math.floor(level.size / level.obstacles);
-                if(expected_position * 64 < 300) level.obstacles--;
 
-                rnd_position = i + Math.floor(Math.random() * ((expected_position + 5) - (expected_position - 5)) + (expected_position - 5));
-                if(i === rnd_position) {
-                    console.log('generating obstacle at position: ' + i * 64);
+                if(i/expected_position === Math.floor(i/expected_position) && next_position) {
+                    if(i === next_position) {
+                        var min = next_position * 0.4, max = next_position * 1.3;
+                        rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
 
-                    level.obstacles--;
+                        console.log(this.game.world.centerX, expected_position, rnd_position)
+                        if(this.game.world.centerX < rnd_position) {
+                            console.log('generating obstacle at position: ' + rnd_position);
 
+                            obstacle = obstacles.create(rnd_position, this.game.world.height - 64, 'obstacles' + Math.floor(1 + Math.random()*4));
+                            obstacle.body.setSize(obstacle.width*0.8, obstacle.height*0.8, obstacle.width*0.1, obstacle.height*0.1);
+                            obstacle.anchor.set(0, 1);
+                            obstacle.body.immovable = true;
+                        }
+                    }
+
+                    next_position = _i + expected_position;
+                } else if(!next_position) {
+                    next_position = expected_position;
                     obstacle = obstacles.create((i-1) * 64, this.game.world.height-64, 'tile_obstacle' + Math.floor(1 + Math.random()*4));
                     obstacle.body.setSize(obstacle.width*0.8, obstacle.height*0.8, obstacle.width*0.1, obstacle.height*0.1);
                     obstacle.anchor.set(0, 1);
