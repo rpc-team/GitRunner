@@ -8,7 +8,6 @@ module.exports = (function() {
 
     //var dude, baddie;
     var characterButtons = {};
-    var startButton, direction = 1;
     var serverLabel;
 
     o.preload = function() {
@@ -29,10 +28,6 @@ module.exports = (function() {
         characterButtons.criss = this.game.add.button(205, 296, 'btn_crissy', onSelectCharacter.bind(null, 'criss'), this, 0, 1, 1);
         characterButtons.criss.frame = 1;
 
-        //// buttons
-        //startButton = this.game.add.button(this.game.world.centerX+200, 200, 'diamond', this.actionOnClick, this);
-        //startButton.anchor.set(0.5);
-
         // text
         serverLabel = this.game.add.text(8, settings.display.height - 16, getServerVersion(serverVersion), {fontSize: '24', fill: '#000' });
     };
@@ -43,12 +38,6 @@ module.exports = (function() {
     }
 
     o.update = function() {
-        //var curScale = startButton.scale;
-        //curScale.x += 0.02 * direction
-        //curScale.y += 0.02 * direction;
-        //if ( curScale.x >= 2 ) direction = -1
-        //if ( curScale.x <= 1 ) direction = 1;
-        //startButton.scale.set(curScale.x, curScale.y);
     };
 
     o.actionOnClick = function(e) {

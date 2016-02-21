@@ -4,6 +4,7 @@
 
 module.exports = (function() {
     var settings = require('../../settings');
+    var ProgressPie = require('../progresspie');
     var o = {};
     var assetPath = 'assets/world' + Math.floor(1 + Math.random()*2) + '/';
     var _tiles = {
@@ -51,16 +52,17 @@ module.exports = (function() {
 
         this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
 
-        this.game.load.audio('guitar', 'assets/sounds/guitar.ogg');
-        this.game.load.audio('jump', 'assets/sounds/jump.ogg');
-        this.game.load.audio('drop', 'assets/sounds/drop.ogg');
-        this.game.load.audio('drop_end', 'assets/sounds/drop_end.ogg');
-
         // temporary usage..
         this.game.load.script('gray', 'https://cdn.rawgit.com/photonstorm/phaser/master/filters/Gray.js');
     };
 
     o.create = function() {
+        //var pie = new ProgressPie(this.game, this.game.world.centerX, this.game.world.centerY, 32);
+        //
+        //this.game.world.add(pie);
+        //pie.color = '#00F';
+        //pie.progress = 0;
+
         cursors = this.game.input.keyboard.createCursorKeys();
         cursors.spacebar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
@@ -246,7 +248,7 @@ module.exports = (function() {
                 break;
 
             case 'running':
-                if ( !this.game.physics.arcade.collide(player, obstacles, onObstacleCollide) || !this.game.physics.arcade.collide(player, monsters, onObstacleCollide) ) {
+                if ( !this.game.physics.arcade.collide(player, obstacles, onObstacleCollide) ) {
                     this.run();
                 }
                 break;
@@ -267,6 +269,16 @@ module.exports = (function() {
         killPlayer();
     }
 
+    function onMonsterCollide(player, monster) {
+        if ( player.bottom >= monster.top ) {
+            player.body.velocity.y = -500;
+            numJumps = 0;
+            monster.kill();
+        } else {
+            killPlayer();
+        }
+    }
+
     o.run = function() {
         var isJumping = !player.body.touching.down;
         var runSpeed = 200;
@@ -278,6 +290,13 @@ module.exports = (function() {
         if (player.body.bottom >= settings.display.height || player.body.touching.right) {
             // kill the player and end the game
             killPlayer();
+            return;
+        }
+
+        if ( this.game.physics.arcade.collide(player, monsters, onMonsterCollide) ) {
+            if ( state == 'dead' ) {
+                return;
+            }
         }
 
         scoreText.setText(returnCurrentScore(0-platforms.children[0].worldPosition.x / 64));
