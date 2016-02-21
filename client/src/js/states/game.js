@@ -224,7 +224,7 @@ module.exports = (function() {
 
     o.run = function() {
         var isJumping = !player.body.touching.down;
-        var runSpeed = 150;
+        var runSpeed = 200;
 
         runSpeed += Math.abs(platforms.children[0].x) / 64;
 
