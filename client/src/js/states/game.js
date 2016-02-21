@@ -18,6 +18,7 @@ module.exports = (function() {
     var deathEmitter, jumpEmitter;
     var scoreText;
     var cursors, spacebar;
+    var music, jump, drop, drop_end;
 
     o.preload = function() {
         console.log('Game.preload');
@@ -30,6 +31,15 @@ module.exports = (function() {
         }
 
         this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
+        //level = {
+        //    size: 1024,
+        //    gaps: 5
+        //}
+
+        this.game.load.audio('guitar', 'assets/sounds/guitar.ogg');
+        this.game.load.audio('jump', 'assets/sounds/jump.ogg');
+        this.game.load.audio('drop', 'assets/sounds/drop.ogg');
+        this.game.load.audio('drop_end', 'assets/sounds/drop_end.ogg');
     };
 
     o.create = function() {
@@ -37,6 +47,11 @@ module.exports = (function() {
 
         cursors = this.game.input.keyboard.createCursorKeys();
         cursors.spacebar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
+        music = this.game.add.audio('guitar',1,true);
+        jump = this.game.add.audio('jump',1);
+        drop = this.game.add.audio('drop',1);
+        drop_end = this.game.add.audio('drop_end',1);
 
         level = this.game.cache.getJSON('level');
 
@@ -133,12 +148,17 @@ module.exports = (function() {
     };
 
     o.update = function() {
+        if ( !music.isPlaying ) {
+            music.play();
+            drop.play();
+        }
         this.game.physics.arcade.collide(player, platforms);
         this.game.physics.arcade.collide(player, obstacles);
         switch (state) {
             case 'waiting':
                 if (player.body.touching.down) {
                     state = 'running';
+                    drop_end.play();
                 }
                 break;
 
@@ -179,6 +199,7 @@ module.exports = (function() {
             // doubleJumps are only allowed on a certain part of the initial jump arc
             if ( player.body.velocity.y > -100 && numJumps < 1 ) {
                 player.body.velocity.y = -250;
+                jump.play();
                 numJumps++;
 
                 jumpEmitter.x = player.worldPosition.x + player.width/2;
