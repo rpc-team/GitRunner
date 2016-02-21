@@ -105,10 +105,10 @@ module.exports = (function() {
 
                     level.obstacles--;
 
-                    obstacle = obstacles.create((i-1) * 64, this.game.world.height-135, 'obstacles');
+                    obstacle = obstacles.create((i-1) * 64, this.game.world.height-64, 'obstacles');
+                    obstacle.anchor.set(0, 1);
+                    obstacle.scale.set(0.8, 0.8);
                     obstacle.body.immovable = true;
-                    obstacle.scale.set(0.5, 0.5);
-                    obstacle.body.friction.x = 0;
                 }
             }
 
@@ -166,7 +166,6 @@ module.exports = (function() {
         }
 
         this.game.physics.arcade.collide(player, platforms);
-        this.game.physics.arcade.collide(player, obstacles, onObstacleCollide);
         switch (state) {
             case 'waiting':
                 if (player.body.touching.down) {
@@ -176,7 +175,9 @@ module.exports = (function() {
                 break;
 
             case 'running':
-                this.run();
+                if ( !this.game.physics.arcade.collide(player, obstacles, onObstacleCollide) ) {
+                    this.run();
+                }
                 break;
 
             case 'dead':
@@ -251,7 +252,7 @@ module.exports = (function() {
             ground.body.velocity.x = -speed;
         }, this);
 
-        obstacles.forEach(function(obstacle, index) {
+        obstacles.forEach(function(obstacle) {
             obstacle.body.velocity.x = -speed;
         }, this);
     }
