@@ -162,8 +162,7 @@ module.exports = (function() {
                 break;
 
             case 'running':
-                this.game.physics.arcade.collide(player, obstacles, onObstacleCollide);
-                if ( state == 'running' ) {
+                if ( !this.game.physics.arcade.collide(player, obstacles, onObstacleCollide) ) {
                     this.run();
                 }
                 break;
