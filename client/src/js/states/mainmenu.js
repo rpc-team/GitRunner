@@ -6,7 +6,8 @@ module.exports = (function() {
     var o = {};
     var settings = require('../../settings');
 
-    var dude, baddie;
+    //var dude, baddie;
+    var characterButtons = {};
     var startButton, direction = 1;
     var serverLabel;
 
@@ -19,12 +20,9 @@ module.exports = (function() {
 
         var serverVersion = this.game.cache.getJSON('server_version');
 
-        dude = this.game.add.sprite(32, 32, 'dude');
-        dude.animations.add('right', [1, 2, 3, 4], 10, true);
-
-        baddie = this.game.add.sprite(128, 64, 'baddie');
-        baddie.animations.add('left', [0, 1, 2], 10, true);
-        baddie.scale.set(2, 2);
+        characterButtons.crissy = this.game.add.button(64, 64, 'btn_crissy', onSelectCharacter.bind(null, 'criss'), this);
+        characterButtons.peter = this.game.add.button(128, 64, 'btn_peter', onSelectCharacter.bind(null, 'peter'), this);
+        characterButtons.ricardo = this.game.add.button(96, 128, 'btn_ricardo', onSelectCharacter.bind(null, 'ricardo'), this);
 
         // buttons
         startButton = this.game.add.button(this.game.world.centerX, 200, 'diamond', this.actionOnClick, this);
@@ -34,11 +32,11 @@ module.exports = (function() {
         serverLabel = this.game.add.text(8, settings.display.height - 16, getServerVersion(serverVersion), {fontSize: '24', fill: '#000' })
     };
 
-    o.update = function() {
-        console.log('MainMenu.update');
-        dude.animations.play('right');
-        baddie.animations.play('left');
+    function onSelectCharacter(charName) {
+        settings.selectedCharacter = charName;
+    }
 
+    o.update = function() {
         var curScale = startButton.scale;
         curScale.x += 0.02 * direction
         curScale.y += 0.02 * direction;

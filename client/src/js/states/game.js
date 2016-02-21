@@ -31,7 +31,7 @@ module.exports = (function() {
     var rnd_position, next_position;
 
     o.preload = function() {
-        console.log('Game.preload');
+        console.log('Selected Character: ' + settings.selectedCharacter);
 
         this.game.stage.backgroundColor = '#000';
 
@@ -41,6 +41,8 @@ module.exports = (function() {
                 this.load.image(k, _tiles[k]);
             }
         }
+
+        this.load.spritesheet('dude', 'assets/' + settings.selectedCharacter + '.png', 48, 64);
 
         this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
 
@@ -54,8 +56,6 @@ module.exports = (function() {
     };
 
     o.create = function() {
-        console.log('Game.create');
-
         cursors = this.game.input.keyboard.createCursorKeys();
         cursors.spacebar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
@@ -274,6 +274,7 @@ module.exports = (function() {
     }
 
     function updateRunnerSpeedTo(speed) {
+        speed = speed < 550 ? speed : 550;
         platforms.forEach(function(ground) {
             ground.body.velocity.x = -speed;
         }, this);

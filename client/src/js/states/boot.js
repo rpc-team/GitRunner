@@ -9,11 +9,9 @@ module.exports = (function() {
     var o = {};
 
     o.preload = function() {
-        console.log('Boot.preload');
     };
 
     o.create = function() {
-        console.log('Boot.create');
 
         // ensure that during scaling, the original proportions are maintained
         this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
