@@ -112,7 +112,7 @@ module.exports = (function() {
         levelOffset = Math.floor(256/64);
         level.size += levelOffset;
         var levelSize = 20;
-        console.log('level size = ' + levelSize);
+        console.log('level size = ' + level.size);
         //for ( var i = 1; i <= level.size; i++ ) {
         for ( levelGenerationIteration = 1; levelGenerationIteration <= levelSize; levelGenerationIteration++ ) {
             if (level.gaps) {
@@ -260,6 +260,9 @@ module.exports = (function() {
                 if(i === next_position.obstacles) {
                     min = next_position.obstacles * 0.9;
                     max = next_position.obstacles * 1.1;
+
+                    if ( max > level.size ) max = level.size-1;
+
                     rnd_position = Math.floor(Math.random() * (max - min) + min) * 64;
 
                     if(this.game.world.centerX < rnd_position) {
