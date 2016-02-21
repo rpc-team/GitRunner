@@ -4,21 +4,9 @@
 
 module.exports = (function() {
     var settings = require('../../settings');
-    var ProgressPie = require('../progresspie');
     var o = {};
-    var assetPath = 'assets/world' + Math.floor(1 + Math.random()*2) + '/';
-    var _tiles = {
-        tile_floor: assetPath + 'tl/tl1.png',
-        tile_bkg: assetPath + 'bg/bg.png',
-        tile_obstacle1: assetPath + 'ob/ob1.png',
-        tile_obstacle2: assetPath + 'ob/ob2.png',
-        tile_obstacle3: assetPath + 'ob/ob3.png',
-        tile_obstacle4: assetPath + 'ob/ob4.png',
-        tile_monster1: assetPath + 'mo/mo1.png',
-        tile_monster2: assetPath + 'mo/mo2.png',
-        tile_monster3: assetPath + 'mo/mo3.png',
-        tile_monster4: assetPath + 'mo/mo4.png'
-    };
+    var assetPath;
+    var _tiles = {};
     var player;
     var state = 'waiting';
     // groups
@@ -46,6 +34,20 @@ module.exports = (function() {
     o.preload = function() {
         console.log('Selected Character: ' + settings.selectedCharacter);
 
+        assetPath = 'assets/world' + Math.floor(1 + Math.random()*2) + '/';
+        _tiles = {
+            tile_floor: assetPath + 'tl/tl1.png',
+            tile_bkg: assetPath + 'bg/bg.png',
+            tile_obstacle1: assetPath + 'ob/ob1.png',
+            tile_obstacle2: assetPath + 'ob/ob2.png',
+            tile_obstacle3: assetPath + 'ob/ob3.png',
+            tile_obstacle4: assetPath + 'ob/ob4.png',
+            tile_monster1: assetPath + 'mo/mo1.png',
+            tile_monster2: assetPath + 'mo/mo2.png',
+            tile_monster3: assetPath + 'mo/mo3.png',
+            tile_monster4: assetPath + 'mo/mo4.png'
+        };
+
         this.game.stage.backgroundColor = '#000';
 
         // load images
@@ -57,18 +59,18 @@ module.exports = (function() {
 
         this.load.spritesheet('dude', 'assets/' + settings.selectedCharacter + '.png', 48, 64);
 
-        this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/game/start/' + settings.playerID);
+        this.game.load.json('level', 'http://' + settings.server.host + ':' + settings.server.port + '/player/' + settings.playerID + '/level');
 
         // temporary usage..
         this.game.load.script('gray', 'https://cdn.rawgit.com/photonstorm/phaser/master/filters/Gray.js');
     };
 
     o.create = function() {
-        //var pie = new ProgressPie(this.game, this.game.world.centerX, this.game.world.centerY, 32);
-        //
-        //this.game.world.add(pie);
-        //pie.color = '#00F';
-        //pie.progress = 0;
+        console.log('Game.create');
+
+        state = 'waiting';
+        next_position = {};
+        empty_gaps = [];
 
         cursors = this.game.input.keyboard.createCursorKeys();
         cursors.spacebar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -126,8 +128,8 @@ module.exports = (function() {
         var signpost = nonCollisionGroup.create(64, this.game.world.height-64, 'signpost');
         signpost.anchor.set(0, 1);
         var avatar = nonCollisionGroup.create(signpost.x + 18, 245, 'repo-avatar');
-        avatar.scale.set(1, 0.8);
-        avatar.alpha = 0.7;
+        avatar.width = 200;
+        avatar.height = 165;
 
         // create the player
         player = this.game.add.sprite(256, 0, 'dude');
