@@ -28,7 +28,9 @@ module.exports = (function() {
     var deathEmitter, jumpEmitter;
     var scoreText, repoText;
     var cursors, spacebar;
-    var music, jump, drop, drop_end, soundsEnabled = false;
+    var music, jump, drop, drop_end, soundsEnabled = true;
+    var sndClick, sndDie, sndDown, sndKillMonster;
+
     var homeButton;
     var userName = 'Your Name';
 
@@ -91,6 +93,10 @@ module.exports = (function() {
         jump = this.game.add.audio('jump', 1);
         drop = this.game.add.audio('drop', 1);
         drop_end = this.game.add.audio('drop_end', 1);
+        sndClick = this.game.add.audio('click');
+        sndDie = this.game.add.audio('die');
+        sndDown = this.game.add.audio('down');
+        sndKillMonster = this.game.add.audio('kill_monster');
 
         // temporary usage..
         grayFilter = this.game.add.filter('Gray');
@@ -213,6 +219,7 @@ module.exports = (function() {
     };
 
     function backToMainMenu() {
+        if ( soundsEnabled ) sndClick.play();
         this.state.start('mainmenu');
     }
 
@@ -242,6 +249,10 @@ module.exports = (function() {
                 break;
         }
     };
+
+    o.shutdown = function() {
+        music.stop();
+    }
 
     o.generateNextGap = function(i, platforms, runSpeed) {
         var min, max, rnd_position, expected_position, ground;
@@ -415,6 +426,8 @@ module.exports = (function() {
             if ( this.game.physics.arcade.collide(player, monsters, onMonsterCollide) ) {
                 if ( state == 'dead' ) {
                     return;
+                } else {
+                    if (soundsEnabled) sndKillMonster.play()
                 }
             }
         }
@@ -437,6 +450,7 @@ module.exports = (function() {
         }
         if (cursors.down.isDown && player.body.velocity.y > -150 ) {
             player.body.velocity.y = 800;
+            if ( soundsEnabled ) sndDown.play();
         }
 
         if (isJumping) {
@@ -528,6 +542,7 @@ module.exports = (function() {
     }
 
     function killPlayer() {
+        if ( soundsEnabled ) sndDie.play();
         state = 'dead';
         updateRunnerSpeedTo(0);
         deathEmitter.x = player.worldPosition.x + player.width / 2;
