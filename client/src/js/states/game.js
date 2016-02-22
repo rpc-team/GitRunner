@@ -351,7 +351,7 @@ module.exports = (function() {
 
     o.run = function() {
         var isJumping = !player.body.touching.down;
-        var runSpeed = 750;
+        var runSpeed = 250;
 
         runSpeed += Math.abs(platforms.children[0].x) / 64;
 
@@ -486,7 +486,7 @@ module.exports = (function() {
     }
 
     function updateRunnerSpeedTo(speed) {
-        //speed = speed < 550 ? speed : 550;
+        speed = speed < 550 ? speed : 550;
         platforms.forEach(function(ground) {
             ground.body.velocity.x = -speed;
         }, this);
@@ -527,7 +527,7 @@ module.exports = (function() {
 
         console.log('Sending score: ' + JSON.stringify(obj));
 
-        rest.post('/score', obj, function (error, data) {
+        rest.post('/score', {data: obj}, function (error, data) {
         });
     }
 
