@@ -26,19 +26,20 @@ module.exports = (function() {
 
         this.game.add.sprite(0, 0, 'mainmenu_bkg');
 
+        var btnScale = 0.6;
         characterButtons.ricardo = this.game.add.button(25, this.game.world.centerY - 60, 'btn_ricardo', o.actionOnClick.bind(this,  { action: 'character', chosenCharacter: 'ricardo' }), this, 0, 1, 0);
-        characterButtons.ricardo.scale.set(0.6, 0.6);
+        characterButtons.ricardo.scale.set(btnScale, btnScale);
 
-        var peterXStart = characterButtons.ricardo.position.x + (this.game.cache.getImage('btn_peter').width / 3) - 105 /* <- temporary value until asset gets fixed */ + 25;
+        var peterXStart = characterButtons.ricardo.position.x + (this.game.cache.getImage('btn_peter').width / 3) + 25;
         characterButtons.peter = this.game.add.button(peterXStart, this.game.world.centerY - 60, 'btn_peter', o.actionOnClick.bind(this,  { action: 'character', chosenCharacter: 'peter' }), this, 0, 1, 0);
-        characterButtons.peter.scale.set(0.6, 0.6);
+        characterButtons.peter.scale.set(btnScale, btnScale);
 
-        var crissXStart = characterButtons.peter.position.x + (this.game.cache.getImage('btn_crissy').width / 3) - 105 /* < -temporary value until asset gets fixed */ + 25;
+        var crissXStart = characterButtons.peter.position.x + (this.game.cache.getImage('btn_crissy').width / 3) + 25;
         characterButtons.criss = this.game.add.button(crissXStart, this.game.world.centerY - 60, 'btn_crissy', o.actionOnClick.bind(this, { action: 'character', chosenCharacter: 'criss' }), this, 0, 1, 0);
-        characterButtons.criss.scale.set(0.6, 0.6);
+        characterButtons.criss.scale.set(btnScale, btnScale);
 
         var helpButton = this.game.add.button(40, this.game.world.height - 100, 'btn_help', o.actionOnClick.bind(this, { action: 'help' }), this);
-        helpButton.scale.set(0.2, 0.2);
+        helpButton.scale.set(0.5, 0.5);
 
         // text
         serverLabel = this.game.add.text(8, this.game.world.height - 26, getServerVersion(serverVersion), { font: '11px Arial', fill: '#fff' });
@@ -83,11 +84,11 @@ module.exports = (function() {
 
         var startX = this.game.world.centerX + 280 - (this.game.cache.getImage('btn_arrow').width / 2);
         var githubMetricsButton = this.game.add.button(startX, this.game.world.centerY + 150, 'btn_arrow', o.displayGitHubMetrics.bind(this), this);
-        githubMetricsButton.scale.set(0.5, 0.5);
+        //githubMetricsButton.scale.set(0.5, 0.5);
         helpGroup.add(githubMetricsButton);
 
         var closeButton = this.game.add.button(startX + ((this.game.cache.getImage('btn_close').width * 0.3) / 2), this.game.world.centerY - 185, 'btn_close', closeHelp, this);
-        closeButton.scale.set(0.3, 0.3);
+        //closeButton.scale.set(0.3, 0.3);
         helpGroup.add(closeButton);
 
         function closeHelp() {
@@ -102,7 +103,7 @@ module.exports = (function() {
 
         var startX = this.game.world.centerX + 280;
         var githubMetricsButton = this.game.add.button(startX, this.game.world.centerY + 150, 'btn_arrow', backToHelp, this);
-        githubMetricsButton.scale.set(-0.5, 0.5);
+        //githubMetricsButton.scale.set(-0.5, 0.5);
         githubGroup.add(githubMetricsButton);
 
         function backToHelp() {

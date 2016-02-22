@@ -32,6 +32,7 @@ module.exports = (function() {
     var sndClick, sndDie, sndDown, sndKillMonster;
 
     var homeButton;
+    var btnVolOn, btnVolOff
     var userName = 'Your Name';
 
     var reposVisitedGUI = [];
@@ -85,6 +86,7 @@ module.exports = (function() {
         next_position = {};
         empty_gaps = [];
         reposVisitedGUI = [];
+        soundsEnabled = true;
 
         cursors = this.game.input.keyboard.createCursorKeys();
         cursors.spacebar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -109,8 +111,6 @@ module.exports = (function() {
         var imgData = new Image();
         imgData.src = level.avatar;
         this.game.cache.addImage('repo-avatar' + currentLevelIndex, level.avatar, imgData);
-
-        var serverVersion = this.game.cache.getJSON('server_version');
 
         var sky = this.game.add.sprite(0, 0, 'tile_bkg');
         sky.width = settings.display.width;
@@ -184,7 +184,11 @@ module.exports = (function() {
         deathEmitter.makeParticles('heart');
         deathEmitter.gravity = 300;
 
-        this.game.add.button(this.game.world.width - 60, 30, 'diamond', playPauseSound, this);
+        btnVolOff = this.game.add.button(this.game.world.width - 60, 25, 'volumeOff', playPauseSound, this);
+        btnVolOff.scale.set(0.5);
+        btnVolOn = this.game.add.button(this.game.world.width - 60, 25, 'volumeOn', playPauseSound, this);
+        btnVolOn.scale.set(0.5);
+        btnVolOn.visible = false;
 
         homeButton = this.game.add.button(this.game.world.centerX, 450, 'home_button', backToMainMenu, this);
         homeButton.width = homeButton.height = 96;
@@ -252,7 +256,7 @@ module.exports = (function() {
 
     o.shutdown = function() {
         music.stop();
-    }
+    };
 
     o.generateNextGap = function(i, platforms, runSpeed) {
         var min, max, rnd_position, expected_position, ground;
@@ -515,10 +519,15 @@ module.exports = (function() {
         if(music.isPlaying) {
             soundsEnabled = false;
             music.pause();
-            startButton.filters = [grayFilter];
+            btnVolOn.visible = true;
+            btnVolOff.visible = false;
+            //startButton.filters = [grayFilter];
         } else {
+            soundsEnabled = true;
             music.play();
-            startButton.filters = null;
+            btnVolOff.visible = true;
+            btnVolOn.visible = false;
+            //startButton.filters = null;
         }
     }
 
