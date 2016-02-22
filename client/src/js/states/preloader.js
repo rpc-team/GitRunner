@@ -46,6 +46,31 @@ module.exports = (function() {
             file: 'assets/mm_c1.png',
             width: 230,
             height: 230
+        },
+        btn_help: {
+            file: 'assets/btn_help.png',
+            width: 240,
+            height: 240
+        },
+        btn_arrow: {
+            file: 'assets/btn_arrow.png',
+            width: 64,
+            height: 64
+        },
+        btn_close: {
+            file: 'assets/btn_close.png',
+            width: 64,
+            height: 64
+        },
+        help: {
+            file: 'assets/help.png',
+            width: 600,
+            height: 400
+        },
+        github: {
+            file: 'assets/github.png',
+            width: 600,
+            height: 400
         }
     };
     var element;

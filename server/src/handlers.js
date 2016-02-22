@@ -35,8 +35,8 @@ function getStartLevel(){
     //return ['Odobo', 'odobox'];
 }
 
-function getNextLevel(prevOwner, prevRepo){
-    return ['vert-x3', 'vertx-lang-js'];
+function getNextLevel(prevOwner, prevRepo){    return ['Odobo', 'odobox'];
+    //return ['vert-x3', 'vertx-lang-js'];
 }
 
 function parseGitHubStats(playerID, gameID, owner, repository, res) {
