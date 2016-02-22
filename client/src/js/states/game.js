@@ -388,7 +388,7 @@ module.exports = (function() {
 
     o.run = function() {
         var isJumping = !player.body.touching.down;
-        var runSpeed = 400;
+        var runSpeed = 250;
 
         runSpeed += Math.abs(platforms.getChildAt(0).x) / 64;
 
@@ -464,7 +464,6 @@ module.exports = (function() {
             numJumps = 0;
         }
 
-        //console.log('Score: ' + score + ', level.size = ' + level.size)
         if ( score > (previousLevelLength + level.size/2) && !isLoadingLevel ) {
             if ( currentLevelIndex < levels.length ) {
                 o.fetchNextLevel(level.gameID, settings.playerID)
@@ -474,7 +473,6 @@ module.exports = (function() {
 
     o.fetchNextLevel = function(gameID, playerID) {
         var _this = this;
-        //console.log('fetching next level. GameID: ' + gameID + ', playerID: ' + playerID);
         isLoadingLevel = true;
 
         var rest = RestJS('http://' + settings.server.host + ':' + settings.server.port, {
@@ -483,12 +481,8 @@ module.exports = (function() {
         });
 
         rest.get('/game/next/' + gameID + '/' + settings.playerID, function(error, data) {
-            //console.log('Loader complete');
-            //console.log(data);
-
             levels[currentLevelIndex+1] = data;
 
-            //_this.game.cache.removeImage('repo-avatar', true);
             var imgData = new Image();
             imgData.src = data.avatar;
             _this.game.cache.addImage('repo-avatar' + (currentLevelIndex+1), data.avatar, imgData);
@@ -521,18 +515,16 @@ module.exports = (function() {
             music.pause();
             btnVolOn.visible = false;
             btnVolOff.visible = true;
-            //startButton.filters = [grayFilter];
         } else {
             soundsEnabled = true;
             music.play();
             btnVolOff.visible = false;
             btnVolOn.visible = true;
-            //startButton.filters = null;
         }
     }
 
     function updateRunnerSpeedTo(speed) {
-        //speed = speed < 550 ? speed : 550;
+        speed = speed < 750 ? speed : 750;
 
         platforms.forEach(function(ground) {
             if(ground.worldPosition.x < -100) {
