@@ -35,6 +35,8 @@ module.exports = (function() {
     var btnVolOn, btnVolOff
     var userName = 'Your Name';
 
+    var pathLength = 0;
+
     var reposVisitedGUI = [];
 
     // temporary usage..
@@ -43,7 +45,7 @@ module.exports = (function() {
     var next_position = {};
     var empty_gaps = [];
 
-    var COLLIDE_ENABLED = true;
+    var COLLIDE_ENABLED = false;
 
     o.preload = function() {
         console.log('Selected Character: ' + settings.selectedCharacter);
@@ -186,9 +188,9 @@ module.exports = (function() {
 
         btnVolOff = this.game.add.button(this.game.world.width - 60, 25, 'volumeOff', playPauseSound, this);
         btnVolOff.scale.set(0.5);
+        btnVolOff.visible = false;
         btnVolOn = this.game.add.button(this.game.world.width - 60, 25, 'volumeOn', playPauseSound, this);
         btnVolOn.scale.set(0.5);
-        btnVolOn.visible = false;
 
         homeButton = this.game.add.button(this.game.world.centerX, 450, 'home_button', backToMainMenu, this);
         homeButton.width = homeButton.height = 96;
@@ -292,9 +294,7 @@ module.exports = (function() {
         //    ground.scale.set(0.5, 0.5);
         //    ground.body.friction.x = 0;
         //}
-
-        var lastChild = platforms.children[i-2];
-        //console.log(i + ' | ' + platforms.children.length + ' | ' + lastChild);
+        var lastChild = platforms.total > 0 ? platforms.getChildAt(platforms.total-1) : null;
         var nextX = lastChild ? lastChild.x + lastChild.width - Math.ceil(runSpeed/64) - 2: (i-1) * 64;
         ground = platforms.create(nextX, this.game.world.height-64, 'tile_floor');
         ground.body.immovable = true;
@@ -390,7 +390,7 @@ module.exports = (function() {
         var isJumping = !player.body.touching.down;
         var runSpeed = 400;
 
-        runSpeed += Math.abs(platforms.children[0].x) / 64;
+        runSpeed += Math.abs(platforms.getChildAt(0).x) / 64;
 
         this.lastTime = this.lastTime || this.game.time.now;
 
@@ -436,7 +436,7 @@ module.exports = (function() {
             }
         }
 
-        var score = Math.round((0-platforms.children[0].worldPosition.x / 64)*100)/100;
+        var score = Math.round((0-pathLength / 64)*100)/100;
         scoreText.setText(returnCurrentScore(score));
 
         if (cursors.up.isDown || cursors.spacebar.isDown) {
@@ -519,34 +519,52 @@ module.exports = (function() {
         if(music.isPlaying) {
             soundsEnabled = false;
             music.pause();
-            btnVolOn.visible = true;
-            btnVolOff.visible = false;
+            btnVolOn.visible = false;
+            btnVolOff.visible = true;
             //startButton.filters = [grayFilter];
         } else {
             soundsEnabled = true;
             music.play();
-            btnVolOff.visible = true;
-            btnVolOn.visible = false;
+            btnVolOff.visible = false;
+            btnVolOn.visible = true;
             //startButton.filters = null;
         }
     }
 
     function updateRunnerSpeedTo(speed) {
         //speed = speed < 550 ? speed : 550;
+
         platforms.forEach(function(ground) {
-            ground.body.velocity.x = -speed;
+            if(ground.worldPosition.x < -100) {
+                pathLength += ground.worldPosition.x;
+                platforms.remove(ground, true);
+            } else {
+                ground.body.velocity.x = -speed;
+            }
         }, this);
 
         obstacles.forEach(function(obstacle) {
-            obstacle.body.velocity.x = -speed;
+            if(obstacle.worldPosition.x < -100) {
+                platforms.remove(obstacle, true);
+            } else {
+                obstacle.body.velocity.x = -speed;
+            }
         }, this);
 
         monsters.forEach(function(monster) {
-            monster.body.velocity.x = -speed;
+            if(monster.worldPosition.x < -100) {
+                platforms.remove(monster, true);
+            } else {
+                monster.body.velocity.x = -speed;
+            }
         }, this);
 
         nonCollisionGroup.forEach(function(o) {
-            o.body.velocity.x = -speed;
+            if(o.worldPosition.x < -100) {
+                platforms.remove(o, true);
+            } else {
+                o.body.velocity.x = -speed;
+            }
         }, this);
     }
 
@@ -569,7 +587,7 @@ module.exports = (function() {
             playerID: settings.playerID,
             gameID: level.gameID,
             nickname: userName,
-            score: Math.round((0-platforms.children[0].worldPosition.x / 64)*100)/100
+            score: Math.round((0-pathLength / 64) * 100) / 100
         };
 
         //console.log('Sending score: ' + JSON.stringify(obj));
