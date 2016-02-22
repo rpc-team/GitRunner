@@ -12,6 +12,8 @@ module.exports = (function() {
 
     o.preload = function() {
         console.log('MainMenu.preload');
+
+        this.game.load.json('leaderboard', 'http://' + settings.server.host + ':' + settings.server.port + '/leaderboard/' + settings.playerID);
     };
 
     o.create = function() {
@@ -21,28 +23,28 @@ module.exports = (function() {
 
         this.game.add.sprite(0, 0, 'mainmenu_bkg');
 
-        characterButtons.ricardo = this.game.add.button(25, this.game.world.centerY - 20, 'btn_ricardo', o.actionOnClick.bind(this,  { action: 'character', chosenCharacter: 'ricardo' }), this, 0, 1, 0);
+        characterButtons.ricardo = this.game.add.button(25, this.game.world.centerY - 60, 'btn_ricardo', o.actionOnClick.bind(this,  { action: 'character', chosenCharacter: 'ricardo' }), this, 0, 1, 0);
         characterButtons.ricardo.scale.set(0.6, 0.6);
 
         var peterXStart = characterButtons.ricardo.position.x + (this.game.cache.getImage('btn_peter').width / 3) - 105 /* <- temporary value until asset gets fixed */ + 25;
-        characterButtons.peter = this.game.add.button(peterXStart, this.game.world.centerY - 20, 'btn_peter', o.actionOnClick.bind(this,  { action: 'character', chosenCharacter: 'peter' }), this, 0, 1, 0);
+        characterButtons.peter = this.game.add.button(peterXStart, this.game.world.centerY - 60, 'btn_peter', o.actionOnClick.bind(this,  { action: 'character', chosenCharacter: 'peter' }), this, 0, 1, 0);
         characterButtons.peter.scale.set(0.6, 0.6);
 
         var crissXStart = characterButtons.peter.position.x + (this.game.cache.getImage('btn_crissy').width / 3) - 105 /* < -temporary value until asset gets fixed */ + 25;
-        characterButtons.criss = this.game.add.button(crissXStart, this.game.world.centerY - 20, 'btn_crissy', o.actionOnClick.bind(this, { action: 'character', chosenCharacter: 'criss' }), this, 0, 1, 0);
+        characterButtons.criss = this.game.add.button(crissXStart, this.game.world.centerY - 60, 'btn_crissy', o.actionOnClick.bind(this, { action: 'character', chosenCharacter: 'criss' }), this, 0, 1, 0);
         characterButtons.criss.scale.set(0.6, 0.6);
 
         var helpButton = this.game.add.button(40, this.game.world.height - 100, 'btn_help', o.actionOnClick.bind(this, { action: 'help' }), this);
         helpButton.scale.set(0.2, 0.2);
 
         // text
-        serverLabel = this.game.add.text(8, this.game.world.height - 26, getServerVersion(serverVersion), { font: '11px Arial', fill: '#000' });
-        pickAndPlayLabel = this.game.add.text(40, this.game.world.centerY - 80, 'Pick and Play:', { font: '30px Arial', fill: '#000' });
+        serverLabel = this.game.add.text(8, this.game.world.height - 26, getServerVersion(serverVersion), { font: '11px Arial', fill: '#fff' });
+        pickAndPlayLabel = this.game.add.text(40, this.game.world.centerY - 110, 'Pick and Play:', { font: '30px Arial', fill: '#fff' });
 
         // TODO: Add a box around 'leaderboard'
-        leaderboardLabel = this.game.add.text(this.game.world.centerX + 250, this.game.world.centerY - 80, 'Leaderboard:', { font: '30px Arial', fill: '#000' });
+        leadersList = this.game.cache.getJSON('leaderboard');
+        leaderboardLabel = this.game.add.text(this.game.world.centerX + 100, this.game.world.centerY - 150, 'Leaderboard:', { font: '30px Arial', fill: '#fff' });
 
-        var leadersList = ['Zeka', 'Teta', 'Xico', 'Fino', 'Bebado'];
         o.displayLeaderBoardValues(leadersList);
     };
 
@@ -55,16 +57,19 @@ module.exports = (function() {
         }
     };
 
-    o.displayLeaderBoardValues = function(leaders) {
+    o.displayLeaderBoardValues = function(obj) {
         var prevText, startX, startY, spaceBetween = 40;
 
-        startX = this.game.world.centerX + 250;
-        startY = this.game.world.centerY - 10;
+        startX = this.game.world.centerX + 100;
+        startY = this.game.world.centerY - 100;
 
-        for(var i = 1; i <= leaders.length; i++) {
-            prevText = this.game.add.text(startX, startY, i + '. ' + leaders[i-1], { font: '22px Arial', fill: '#000' });
+        for(var i = 1; i <= obj.leaderboard.length; i++) {
+            prevText = this.game.add.text(startX, startY, i + '. ' + obj.leaderboard[i-1].nickname.substr(0, 15), { font: '22px Arial', fill: '#fff' });
+            this.game.add.text(startX + 230, startY, ' (' + obj.leaderboard[i-1].score + ')', { font: '22px Arial', fill: '#fff' });
             startY = prevText.position.y + spaceBetween;
         }
+
+        this.game.add.text(startX, startY + 20, obj.player.position + '. You (' + obj.player.score + ')', { font: '22px Arial', fill: '#fff' });
     };
 
     o.displayHelp = function() {
