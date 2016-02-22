@@ -26,11 +26,13 @@ module.exports = (function() {
     var numJumps = 0;
     var gameOverLabel;
     var deathEmitter, jumpEmitter;
-    var scoreText;
+    var scoreText, repoText;
     var cursors, spacebar;
     var music, jump, drop, drop_end, soundsEnabled = false;
     var homeButton;
     var userName = 'Your Name';
+
+    var reposVisitedGUI = [];
 
     // temporary usage..
     var grayFilter;
@@ -38,7 +40,7 @@ module.exports = (function() {
     var next_position = {};
     var empty_gaps = [];
 
-    var COLLIDE_ENABLED = false;
+    var COLLIDE_ENABLED = true;
 
     o.preload = function() {
         console.log('Selected Character: ' + settings.selectedCharacter);
@@ -80,6 +82,7 @@ module.exports = (function() {
         state = 'waiting';
         next_position = {};
         empty_gaps = [];
+        reposVisitedGUI = [];
 
         cursors = this.game.input.keyboard.createCursorKeys();
         cursors.spacebar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -149,7 +152,7 @@ module.exports = (function() {
         player.animations.add('fall', [0], 10, true);
 
         // text
-        gameOverLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY-100, 'Game Over', {font: 'bold 96pt arial', fill: '#F00'});
+        gameOverLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY-200, 'Game Over', {font: 'bold 96pt arial', fill: '#F00'});
         gameOverLabel.anchor.set(0.5);
         gameOverLabel.visible = false;
         scoreText = this.game.add.text(0, 0, returnCurrentScore(0), {
@@ -159,6 +162,10 @@ module.exports = (function() {
             boundsAlignV: 'top'
         });
         scoreText.setTextBounds(50, 30, 150, 0);
+
+        repoText = this.game.add.text(this.game.world.centerX, this.game.world.centerY - 125, 'Visited Repositories', {font: 'bold 24pt arial'});
+        repoText.anchor.set(0.5, 0);
+        repoText.visible = false;
 
         // emitters
         jumpEmitter = this.game.add.emitter(this.game.world.centerX, 0);
@@ -173,10 +180,29 @@ module.exports = (function() {
 
         this.game.add.button(this.game.world.width - 60, 30, 'diamond', playPauseSound, this);
 
-        homeButton = this.game.add.button(this.game.world.centerX - 256, this.game.world.centerY, 'home_button', backToMainMenu, this);
-        homeButton.scale.set(0.5);
+        homeButton = this.game.add.button(this.game.world.centerX, 450, 'home_button', backToMainMenu, this);
+        homeButton.width = homeButton.height = 96;
         homeButton.visible = false;
+
+        // Repos visited GUI objects
+        o.addVisitedRepo(level);
     };
+
+    o.addVisitedRepo = function(l) {
+        var i = this.game.add.sprite(this.game.world.centerX-200, this.game.world.centerY - 75 + reposVisitedGUI.length*32, 'repo-avatar' + reposVisitedGUI.length);
+        var t = this.game.add.text(this.game.world.centerX-152, this.game.world.centerY - 75 + reposVisitedGUI.length*32, l.owner + '/' + l.repository, {font: 'normal 16pt arial'});
+
+        i.width = 24;
+        i.height = 24;
+        t.height = 24;
+        t.visible = false;
+        i.visible = false;
+
+        reposVisitedGUI.push({
+            avatar: i,
+            text: t
+        });
+    }
 
     o.createAvatar = function(startPos) {
         var signpost = nonCollisionGroup.create(startPos + 64, this.game.world.height-64, 'signpost');
@@ -347,7 +373,7 @@ module.exports = (function() {
 
     o.run = function() {
         var isJumping = !player.body.touching.down;
-        var runSpeed = 250;
+        var runSpeed = 400;
 
         runSpeed += Math.abs(platforms.children[0].x) / 64;
 
@@ -373,6 +399,7 @@ module.exports = (function() {
                 levelGenerationIteration = 0;
                 level = levels[++currentLevelIndex];
                 o.createAvatar(previousLevelLength*64);
+                o.addVisitedRepo(level);
             }
         }
 
@@ -461,6 +488,13 @@ module.exports = (function() {
             scale.y -= 0.05;
             player.scale = scale;
         }
+
+        repoText.visible = true;
+
+        for ( var i = 0; i < Math.min(6, reposVisitedGUI.length); i++ ) {
+            reposVisitedGUI[i].avatar.visible = true;
+            reposVisitedGUI[i].text.visible = true;
+        }
     };
 
     function playPauseSound() {
@@ -475,7 +509,7 @@ module.exports = (function() {
     }
 
     function updateRunnerSpeedTo(speed) {
-        speed = speed < 550 ? speed : 550;
+        //speed = speed < 550 ? speed : 550;
         platforms.forEach(function(ground) {
             ground.body.velocity.x = -speed;
         }, this);
