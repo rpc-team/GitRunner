@@ -199,12 +199,15 @@ module.exports = function() {
             var gameID = req.params.gameID;
             var level = getNextLevel();  //TODO to be decided if we put here the last level played or we make any connections for them, one option is to randomly select from an array of preset repos
 
-            //if(){
-            //
-            //} else {
-            //
-            //}
-            parseGitHubStats(playerID, gameID, level[0], level[1], res);
+            // TODO: Check if gameID and playerID are actually valid. If not, send an error
+
+            db.collection('gameplay').findOne({_id: playerID+'_'+gameID}, function(err, doc) {
+                if ( !err && doc ) {
+                    parseGitHubStats(playerID, gameID, level[0], level[1], res);
+                } else {
+                    res.status(404).send({ message: 'Stop sending crap! Please!' });
+                }
+            });
         },
         score: function(req, res){
             var body = req.body;
