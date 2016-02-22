@@ -10,6 +10,9 @@ module.exports = (function() {
     var _tiles = {};
     var player;
     var state = 'waiting';
+
+    var spinner;
+
     // groups
     var platforms, nonCollisionGroup;
     var obstacles, monsters;
@@ -45,7 +48,7 @@ module.exports = (function() {
     var next_position = {};
     var empty_gaps = [];
 
-    var COLLIDE_ENABLED = false;
+    var COLLIDE_ENABLED = true;
 
     o.preload = function() {
         console.log('Selected Character: ' + settings.selectedCharacter);
@@ -83,6 +86,7 @@ module.exports = (function() {
 
     o.create = function() {
         console.log('Game.create');
+
 
         state = 'waiting';
         next_position = {};
@@ -133,9 +137,9 @@ module.exports = (function() {
         level.size += levelOffset;
         var levelSize = 20;
         for ( levelGenerationIteration = 1; levelGenerationIteration <= levelSize; levelGenerationIteration++ ) {
-            if (level.gaps) {
+            //if (level.gaps) {
                 o.generateNextGap(levelGenerationIteration, platforms);
-            }
+            //}
 
             if(level.obstacles) {
                 o.generateNextObstacle(levelGenerationIteration, obstacles);
@@ -192,7 +196,7 @@ module.exports = (function() {
         btnVolOn = this.game.add.button(this.game.world.width - 60, 25, 'volumeOn', playPauseSound, this);
         btnVolOn.scale.set(0.5);
 
-        homeButton = this.game.add.button(this.game.world.centerX, 450, 'home_button', backToMainMenu, this);
+        homeButton = this.game.add.button(this.game.world.centerX, 410, 'home_button', backToMainMenu, this);
         homeButton.width = homeButton.height = 96;
         homeButton.visible = false;
 
@@ -395,9 +399,9 @@ module.exports = (function() {
         this.lastTime = this.lastTime || this.game.time.now;
 
         if ( levelGenerationIteration < level.size ) {
-            if (level.gaps) {
+            //if (level.gaps) {
                 o.generateNextGap(levelGenerationIteration, platforms, runSpeed);
-            }
+            //}
 
             if(level.obstacles) {
                 o.generateNextObstacle(levelGenerationIteration, obstacles);
@@ -568,24 +572,27 @@ module.exports = (function() {
         deathEmitter.y = player.worldPosition.y + player.height / 2;
         deathEmitter.start(true, 2000, null, 15);
 
-        userName = window.prompt('Enter your name for the leaderboard', userName);
+        setTimeout(function() {
+            userName = window.prompt('Enter your name for the leaderboard', userName);
 
-        var rest = RestJS('http://' + settings.server.host + ':' + settings.server.port, {
-            crossDomain: true,
-            defaultFormat: null
-        });
+            var rest = RestJS('http://' + settings.server.host + ':' + settings.server.port, {
+                crossDomain: true,
+                defaultFormat: null
+            });
 
-        var obj = {
-            playerID: settings.playerID,
-            gameID: level.gameID,
-            nickname: userName,
-            score: Math.round((0-pathLength / 64) * 100) / 100
-        };
+            var obj = {
+                playerID: settings.playerID,
+                gameID: level.gameID,
+                nickname: userName,
+                score: Math.round((0-pathLength / 64) * 100) / 100
+            };
 
-        //console.log('Sending score: ' + JSON.stringify(obj));
+            //console.log('Sending score: ' + JSON.stringify(obj));
 
-        rest.post('/score', {data: obj}, function (error, data) {
-        });
+            rest.post('/score', {data: obj}, function (error, data) {
+            });
+
+        }, 1000);
     }
 
     function returnCurrentScore(score) {

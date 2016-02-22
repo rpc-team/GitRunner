@@ -34,7 +34,7 @@ var repoList = [
     ['rpc-team', 'GitRunner'],
     ['Odobo', 'odobox'],
     ['Netflix', 'hystrix'],
-    ['eclipse', 'vert.x'],
+    ['vert-x3', 'vertx-lang-js'],
     ['FreeCodeCamp', 'FreeCodeCamp'],
     ['qutheory', 'vapor'],
     ['google', 'closure-compiler'],
@@ -123,6 +123,33 @@ function parseGitHubStats(playerID, gameID, owner, repository, res) {
 
                     Object.keys(allData.languages).map(function(v) { if(allData.languages[v] > maxLangSize) maxLangSize = allData.languages[v]; });
 
+                    function returnBestRepoSize(size){
+                        var minSize = (Math.floor(maxLangSize / 1024) + allData.repo.subscribers_count) * 5;
+                        var maxSize = 2500;
+
+                        if ( size > maxSize ) return maxSize;
+                        if ( size < minSize ) return minSize;
+                        return size;
+                    }
+
+                    var repoSize = returnBestRepoSize(allData.repo.size);
+                    var varianceFactor = allData.repo.size > 2500 ? 2500 / allData.repo.size : 1;
+                    var obsNumber = Math.floor(maxLangSize / 1024 * varianceFactor);
+
+                    var data = {
+                        playerID: playerID,
+                        gameID: gameID,
+                        owner: owner,
+                        repository: repository,
+                        size: repoSize,
+                        obstacles: obsNumber < Math.floor(repoSize / 5) ? Math.floor(repoSize / 5) : obsNumber,
+                        monsters: Math.floor(allData.repo.subscribers_count * varianceFactor),
+                        gaps: Math.floor(Object.keys(allData.branches).length * varianceFactor),
+                        fires: Math.floor(allData.repo.forks_count * varianceFactor),
+                        readme: allData.readme,
+                        avatar: 'data:' + contentType + ';base64,' + imgb64
+                    };
+
                     //function returnBestRepoSize(size){
                     //    var minSize = (Math.floor(maxLangSize / 1024) + allData.repo.subscribers_count) * 5;
                     //    var maxSize = 2500;
@@ -130,21 +157,19 @@ function parseGitHubStats(playerID, gameID, owner, repository, res) {
                     //        return
                     //    }
                     //}
-
-
-                    var data = {
-                        playerID: playerID,
-                        gameID: gameID,
-                        owner: owner,
-                        repository: repository,
-                        size: (Math.floor(maxLangSize / 1024) + allData.repo.subscribers_count) * 5,
-                        obstacles: Math.floor(maxLangSize / 1024),
-                        monsters: allData.repo.subscribers_count,
-                        gaps: Object.keys(allData.branches).length,
-                        fires: allData.repo.forks_count,
-                        readme: allData.readme,
-                        avatar: 'data:' + contentType + ';base64,' + imgb64
-                    };
+                    //var data = {
+                    //    playerID: playerID,
+                    //    gameID: gameID,
+                    //    owner: owner,
+                    //    repository: repository,
+                    //    size: (Math.floor(maxLangSize / 1024) + allData.repo.subscribers_count) * 5,
+                    //    obstacles: Math.floor(maxLangSize / 1024),
+                    //    monsters: allData.repo.subscribers_count,
+                    //    gaps: Object.keys(allData.branches).length,
+                    //    fires: allData.repo.forks_count,
+                    //    readme: allData.readme,
+                    //    avatar: 'data:' + contentType + ';base64,' + imgb64
+                    //};
 
                     db.collection('gameplay').updateOne({ "_id" : playerID + "_" + gameID }, { $inc: { "maxScoreSize": data.size }}, function(err, result) {
                         if(!err) {
