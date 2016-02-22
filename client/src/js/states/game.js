@@ -38,7 +38,7 @@ module.exports = (function() {
     var next_position = {};
     var empty_gaps = [];
 
-    var COLLIDE_ENABLED = false;
+    var COLLIDE_ENABLED = true;
 
     o.preload = function() {
         console.log('Selected Character: ' + settings.selectedCharacter);
@@ -507,14 +507,28 @@ module.exports = (function() {
     function killPlayer() {
         state = 'dead';
         updateRunnerSpeedTo(0);
-        deathEmitter.x = player.worldPosition.x + player.width/2;
-        deathEmitter.y = player.worldPosition.y + player.height/2;
+        deathEmitter.x = player.worldPosition.x + player.width / 2;
+        deathEmitter.y = player.worldPosition.y + player.height / 2;
         deathEmitter.start(true, 2000, null, 15);
 
         userName = window.prompt('Enter your name for the leaderboard', userName);
 
-        // TODO: Send end-of-game report to the server
+        var rest = RestJS('http://' + settings.server.host + ':' + settings.server.port, {
+            crossDomain: true,
+            defaultFormat: null
+        });
 
+        var obj = {
+            playerID: settings.playerID,
+            gameID: level.gameID,
+            nickname: userName,
+            score: Math.round((0-platforms.children[0].worldPosition.x / 64)*100)/100
+        };
+
+        console.log('Sending score: ' + JSON.stringify(obj));
+
+        rest.post('/score', obj, function (error, data) {
+        });
     }
 
     function returnCurrentScore(score) {
