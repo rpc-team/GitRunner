@@ -26,6 +26,10 @@ module.exports = (function() {
         settings.playerID = Math.floor(1 + Math.random() * 10);
         console.log("PlayerID = " + settings.playerID);
 
+        this.game.scale.pageAlignHorizontally = true;
+        this.game.scale.pageAlignVertically = true;
+        this.game.scale.refresh();
+
         // lets move along!
         this.state.start('preloader');
 

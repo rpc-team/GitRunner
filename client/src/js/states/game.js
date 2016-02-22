@@ -152,7 +152,7 @@ module.exports = (function() {
         player.health = 100;
 
         // text
-        serverLabel = this.game.add.text(8, 8, getServerVersion(serverVersion), {fontSize: '24', fill: '#000' });
+        serverLabel = this.game.add.text(8, 8, getServerVersion(serverVersion), {font: '12px Arial', fill: '#000' });
         gameOverLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY-100, 'Game Over', {font: 'bold 96pt arial', fill: '#F00'});
         gameOverLabel.anchor.set(0.5);
         gameOverLabel.visible = false;
