@@ -47,7 +47,7 @@ module.exports = (function() {
 
         // TODO: Add a box around 'leaderboard'
         leadersList = this.game.cache.getJSON('leaderboard');
-        leaderboardLabel = this.game.add.text(this.game.world.centerX + 100, this.game.world.centerY - 150, 'Leaderboard:', { font: '30px Arial', fill: '#fff' });
+        leaderboardLabel = this.game.add.text(this.game.world.centerX + 100, 190, 'Leaderboard:', { font: '30px Arial', fill: '#fff' });
 
         o.displayLeaderBoardValues(leadersList);
     };
@@ -66,7 +66,7 @@ module.exports = (function() {
         var prevText, startX, startY, spaceBetween = 40;
 
         startX = this.game.world.centerX + 100;
-        startY = this.game.world.centerY - 100;
+        startY = 200 + 40;
 
         for(var i = 1; i <= obj.leaderboard.length; i++) {
             prevText = this.game.add.text(startX, startY, i + '. ' + obj.leaderboard[i-1].nickname.substr(0, 15), { font: '22px Arial', fill: '#fff' });
@@ -74,7 +74,8 @@ module.exports = (function() {
             startY = prevText.position.y + spaceBetween;
         }
 
-        this.game.add.text(startX, startY + 20, obj.player.position + '. You (' + obj.player.score + ')', { font: '22px Arial', fill: '#fff' });
+        this.game.add.text(startX, startY + 20, obj.player.position + '. You', { font: '22px Arial', fill: '#fff' });
+        this.game.add.text(startX + 230, startY + 20, ' (' +  obj.player.score + ')', { font: '22px Arial', fill: '#fff' })
     };
 
     o.displayHelp = function() {
@@ -82,9 +83,9 @@ module.exports = (function() {
 
         helpGroup.create(this.game.world.centerX - 300, this.game.world.centerY - 200, 'help');
 
-        var startX = this.game.world.centerX + 280 - (this.game.cache.getImage('btn_arrow').width / 2);
+        var startX = this.game.world.centerX + 260 - (this.game.cache.getImage('btn_arrow').width / 2);
         var githubMetricsButton = this.game.add.button(startX, this.game.world.centerY + 150, 'btn_arrow', o.displayGitHubMetrics.bind(this), this);
-        //githubMetricsButton.scale.set(0.5, 0.5);
+        githubMetricsButton.scale.set(-1, 1);
         helpGroup.add(githubMetricsButton);
 
         var closeButton = this.game.add.button(startX + ((this.game.cache.getImage('btn_close').width * 0.3) / 2), this.game.world.centerY - 185, 'btn_close', closeHelp, this);
@@ -101,7 +102,7 @@ module.exports = (function() {
 
         githubGroup.create(this.game.world.centerX - 300, this.game.world.centerY - 200, 'github');
 
-        var startX = this.game.world.centerX + 280;
+        var startX = this.game.world.centerX + 260 - (this.game.cache.getImage('btn_arrow').width / 2);
         var githubMetricsButton = this.game.add.button(startX, this.game.world.centerY + 150, 'btn_arrow', backToHelp, this);
         //githubMetricsButton.scale.set(-0.5, 0.5);
         githubGroup.add(githubMetricsButton);

@@ -59,12 +59,12 @@ module.exports = (function() {
             height: 64
         },
         help: {
-            file: 'assets/help.png',
+            file: 'assets/how_to_play.png',
             width: 600,
             height: 400
         },
         github: {
-            file: 'assets/github.png',
+            file: 'assets/what_is.png',
             width: 600,
             height: 400
         }
