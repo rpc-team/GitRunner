@@ -93,7 +93,6 @@ module.exports = (function() {
         grayFilter = this.game.add.filter('Gray');
 
         level = this.game.cache.getJSON('level');
-        console.log(level);
         levels[currentLevelIndex] = level;
         level = levels[currentLevelIndex];
         isLoadingLevel = false;
@@ -122,8 +121,6 @@ module.exports = (function() {
         levelOffset = Math.floor(256/64);
         level.size += levelOffset;
         var levelSize = 20;
-        console.log('level size = ' + level.size);
-        //for ( var i = 1; i <= level.size; i++ ) {
         for ( levelGenerationIteration = 1; levelGenerationIteration <= levelSize; levelGenerationIteration++ ) {
             if (level.gaps) {
                 o.generateNextGap(levelGenerationIteration, platforms);
@@ -182,7 +179,6 @@ module.exports = (function() {
     };
 
     o.createAvatar = function(startPos) {
-        console.log('Putting avatar signpost @ ' + (startPos+64));
         var signpost = nonCollisionGroup.create(startPos + 64, this.game.world.height-64, 'signpost');
         signpost.anchor.set(0, 1);
         var avatar = nonCollisionGroup.create(signpost.x + 18, 245, 'repo-avatar' + currentLevelIndex);
@@ -257,9 +253,8 @@ module.exports = (function() {
         //}
 
         var lastChild = platforms.children[i-2];
-        console.log(i + ' | ' + platforms.children.length + ' | ' + lastChild);
+        //console.log(i + ' | ' + platforms.children.length + ' | ' + lastChild);
         var nextX = lastChild ? lastChild.x + lastChild.width - Math.ceil(runSpeed/64) - 2: (i-1) * 64;
-        //ground = platforms.create((i-1) * 64, this.game.world.height-64, 'tile_floor');
         ground = platforms.create(nextX, this.game.world.height-64, 'tile_floor');
         ground.body.immovable = true;
         ground.scale.set(0.5, 0.5);
@@ -358,35 +353,28 @@ module.exports = (function() {
 
         this.lastTime = this.lastTime || this.game.time.now;
 
-        //if ( this.lastTime >= this.game.time.now ) {
-            //console.log('levelGenerationIteration: ' + levelGenerationIteration + ' | level.size = ' + level.size);
-            if ( levelGenerationIteration < level.size ) {
-                if (level.gaps) {
-                    o.generateNextGap(levelGenerationIteration, platforms, runSpeed);
-                }
-
-                if(level.obstacles) {
-                    o.generateNextObstacle(levelGenerationIteration, obstacles);
-                }
-
-                if(level.monsters) {
-                    o.generateNextMonster(levelGenerationIteration, monsters);
-                }
-                levelGenerationIteration++;
-            } else {
-                //console.log(currentLevelIndex + ' / ' + (levels.length-1));
-                if ( currentLevelIndex < levels.length-1 ) {
-                    console.log('Generating next levels map: ' + (currentLevelIndex+1));
-                    previousLevelLength += level.size;
-                    levelGenerationIteration = 0;
-                    level = levels[++currentLevelIndex];
-                    o.createAvatar(previousLevelLength*64);
-                }
+        if ( levelGenerationIteration < level.size ) {
+            if (level.gaps) {
+                o.generateNextGap(levelGenerationIteration, platforms, runSpeed);
             }
-        //}
-        //
-        //this.lastTime = this.game.time.now + 100;
 
+            if(level.obstacles) {
+                o.generateNextObstacle(levelGenerationIteration, obstacles);
+            }
+
+            if(level.monsters) {
+                o.generateNextMonster(levelGenerationIteration, monsters);
+            }
+            levelGenerationIteration++;
+        } else {
+            if ( currentLevelIndex < levels.length-1 ) {
+                console.log('Generating next levels map: ' + (currentLevelIndex+1));
+                previousLevelLength += level.size;
+                levelGenerationIteration = 0;
+                level = levels[++currentLevelIndex];
+                o.createAvatar(previousLevelLength*64);
+            }
+        }
 
         updateRunnerSpeedTo(runSpeed);
 
@@ -441,7 +429,7 @@ module.exports = (function() {
 
     o.fetchNextLevel = function(gameID, playerID) {
         var _this = this;
-        console.log('fetching next level. GameID: ' + gameID + ', playerID: ' + playerID);
+        //console.log('fetching next level. GameID: ' + gameID + ', playerID: ' + playerID);
         isLoadingLevel = true;
 
         var rest = RestJS('http://' + settings.server.host + ':' + settings.server.port, {
@@ -450,8 +438,8 @@ module.exports = (function() {
         });
 
         rest.get('/game/next/' + gameID + '/' + settings.playerID, function(error, data) {
-            console.log('Loader complete');
-            console.log(data);
+            //console.log('Loader complete');
+            //console.log(data);
 
             levels[currentLevelIndex+1] = data;
 
@@ -526,7 +514,7 @@ module.exports = (function() {
             score: Math.round((0-platforms.children[0].worldPosition.x / 64)*100)/100
         };
 
-        console.log('Sending score: ' + JSON.stringify(obj));
+        //console.log('Sending score: ' + JSON.stringify(obj));
 
         rest.post('/score', {data: obj}, function (error, data) {
         });
