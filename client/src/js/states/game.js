@@ -24,7 +24,7 @@ module.exports = (function() {
     var isLoadingLevel = false;
 
     var numJumps = 0;
-    var serverLabel, gameOverLabel;
+    var gameOverLabel;
     var deathEmitter, jumpEmitter;
     var scoreText;
     var cursors, spacebar;
@@ -149,10 +149,8 @@ module.exports = (function() {
         player.animations.add('right', [1, 2, 3, 4], 10, true);
         player.animations.add('jump', [5, 6], 10, true);
         player.animations.add('fall', [0], 10, true);
-        player.health = 100;
 
         // text
-        serverLabel = this.game.add.text(8, 8, getServerVersion(serverVersion), {font: '12px Arial', fill: '#000' });
         gameOverLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY-100, 'Game Over', {font: 'bold 96pt arial', fill: '#F00'});
         gameOverLabel.anchor.set(0.5);
         gameOverLabel.visible = false;
@@ -534,10 +532,6 @@ module.exports = (function() {
     function returnCurrentScore(score) {
         score = Math.round(score*100)/100;
         return 'Distance: ' + score + 'm';
-    }
-
-    function getServerVersion(o) {
-        return 'Server version: ' + o.name + ' ' + o.version + ' | Health: ' + player.health;
     }
 
     return o;
