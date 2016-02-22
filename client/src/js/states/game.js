@@ -152,16 +152,16 @@ module.exports = (function() {
         player.animations.add('fall', [0], 10, true);
 
         // text
-        gameOverLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY-200, 'Game Over', {font: 'bold 96pt arial', fill: '#F00'});
+        gameOverLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY-200, 'Game Over', {font: 'bold 72pt arial', fill: '#F00'});
         gameOverLabel.anchor.set(0.5);
         gameOverLabel.visible = false;
         scoreText = this.game.add.text(0, 0, returnCurrentScore(0), {
-            font: '30px Arial',
+            font: '24pt Arial',
             align: 'center',
             boundsAlignH: 'left',
             boundsAlignV: 'top'
         });
-        scoreText.setTextBounds(50, 30, 150, 0);
+        scoreText.setTextBounds(10, 10, 150, 0);
 
         repoText = this.game.add.text(this.game.world.centerX, this.game.world.centerY - 125, 'Visited Repositories', {font: 'bold 24pt arial'});
         repoText.anchor.set(0.5, 0);
