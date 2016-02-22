@@ -22,8 +22,14 @@ module.exports = (function() {
         // start the physics system
         this.game.physics.startSystem(Phaser.Physics[settings.physicsEngine]);
 
+        var playerId = localStorage.getItem('playerId');
+        if(!playerId) {
+            playerId = generateID();
+            localStorage.setItem('playerId', playerId);
+        }
+
         // generate the player ID
-        settings.playerID = Math.floor(1 + Math.random() * 10);
+        settings.playerID = playerId;
         console.log("PlayerID = " + settings.playerID);
 
         this.game.scale.pageAlignHorizontally = true;
@@ -33,6 +39,17 @@ module.exports = (function() {
         // lets move along!
         this.state.start('preloader');
 
+    };
+
+    function generateID() {
+        function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000)
+                .toString(16)
+                .substring(1);
+        }
+
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+            s4() + '-' + s4() + s4() + s4();
     };
 
     return o;
