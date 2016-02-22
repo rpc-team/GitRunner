@@ -38,7 +38,7 @@ module.exports = (function() {
     var next_position = {};
     var empty_gaps = [];
 
-    var COLLIDE_ENABLED = true;
+    var COLLIDE_ENABLED = false;
 
     o.preload = function() {
         console.log('Selected Character: ' + settings.selectedCharacter);
@@ -93,6 +93,7 @@ module.exports = (function() {
         grayFilter = this.game.add.filter('Gray');
 
         level = this.game.cache.getJSON('level');
+        console.log(level);
         levels[currentLevelIndex] = level;
         level = levels[currentLevelIndex];
         isLoadingLevel = false;
@@ -254,7 +255,9 @@ module.exports = (function() {
         //    ground.scale.set(0.5, 0.5);
         //    ground.body.friction.x = 0;
         //}
+
         var lastChild = platforms.children[i-2];
+        console.log(i + ' | ' + platforms.children.length + ' | ' + lastChild);
         var nextX = lastChild ? lastChild.x + lastChild.width - Math.ceil(runSpeed/64) - 2: (i-1) * 64;
         //ground = platforms.create((i-1) * 64, this.game.world.height-64, 'tile_floor');
         ground = platforms.create(nextX, this.game.world.height-64, 'tile_floor');
@@ -355,7 +358,7 @@ module.exports = (function() {
 
         this.lastTime = this.lastTime || this.game.time.now;
 
-        if ( this.lastTime >= this.game.time.now ) {
+        //if ( this.lastTime >= this.game.time.now ) {
             //console.log('levelGenerationIteration: ' + levelGenerationIteration + ' | level.size = ' + level.size);
             if ( levelGenerationIteration < level.size ) {
                 if (level.gaps) {
@@ -380,9 +383,9 @@ module.exports = (function() {
                     o.createAvatar(previousLevelLength*64);
                 }
             }
-        }
-
-        this.lastTime = this.game.time.now + 100;
+        //}
+        //
+        //this.lastTime = this.game.time.now + 100;
 
 
         updateRunnerSpeedTo(runSpeed);

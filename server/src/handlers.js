@@ -30,13 +30,28 @@ function generateID() {
         s4() + '-' + s4() + s4() + s4();
 };
 
+var repoList = [
+    ['rpc-team', 'GitRunner'],
+    ['Odobo', 'odobox'],
+    ['Netflix', 'hystrix'],
+    ['eclipse', 'vert.x'],
+    ['FreeCodeCamp', 'FreeCodeCamp'],
+    ['qutheory', 'vapor'],
+    ['google', 'closure-compiler'],
+    ['facebook', 'react-native'],
+    ['torvalds', 'linux'],
+    ['fogleman', 'Craft'],
+    ['callmecavs', 'layzr.js']
+];
+
 function getStartLevel(){
-    return ['rpc-team', 'GitRunner'];
-    //return ['Odobo', 'odobox'];
+    var index = Math.floor(Math.random() * repoList.length);
+    return repoList[index];
 }
 
-function getNextLevel(prevOwner, prevRepo){    return ['Odobo', 'odobox'];
-    //return ['vert-x3', 'vertx-lang-js'];
+function getNextLevel(prevOwner, prevRepo){
+    var index = Math.floor(Math.random() * repoList.length);
+    return repoList[index];
 }
 
 function parseGitHubStats(playerID, gameID, owner, repository, res) {
