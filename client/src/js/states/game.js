@@ -26,13 +26,18 @@ module.exports = (function() {
     var numJumps = 0;
     var gameOverLabel;
     var deathEmitter, jumpEmitter;
-    var scoreText;
+    var scoreText, repoText;
     var cursors, spacebar;
-    var music, jump, drop, drop_end, soundsEnabled = false;
+    var music, jump, drop, drop_end, soundsEnabled = true;
+    var sndClick, sndDie, sndDown, sndKillMonster;
+
     var homeButton;
+    var btnVolOn, btnVolOff
     var userName = 'Your Name';
 
     var pathLength = 0;
+
+    var reposVisitedGUI = [];
 
     // temporary usage..
     var grayFilter;
@@ -82,6 +87,8 @@ module.exports = (function() {
         state = 'waiting';
         next_position = {};
         empty_gaps = [];
+        reposVisitedGUI = [];
+        soundsEnabled = true;
 
         cursors = this.game.input.keyboard.createCursorKeys();
         cursors.spacebar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -90,6 +97,10 @@ module.exports = (function() {
         jump = this.game.add.audio('jump', 1);
         drop = this.game.add.audio('drop', 1);
         drop_end = this.game.add.audio('drop_end', 1);
+        sndClick = this.game.add.audio('click');
+        sndDie = this.game.add.audio('die');
+        sndDown = this.game.add.audio('down');
+        sndKillMonster = this.game.add.audio('kill_monster');
 
         // temporary usage..
         grayFilter = this.game.add.filter('Gray');
@@ -102,8 +113,6 @@ module.exports = (function() {
         var imgData = new Image();
         imgData.src = level.avatar;
         this.game.cache.addImage('repo-avatar' + currentLevelIndex, level.avatar, imgData);
-
-        var serverVersion = this.game.cache.getJSON('server_version');
 
         var sky = this.game.add.sprite(0, 0, 'tile_bkg');
         sky.width = settings.display.width;
@@ -151,16 +160,20 @@ module.exports = (function() {
         player.animations.add('fall', [0], 10, true);
 
         // text
-        gameOverLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY-100, 'Game Over', {font: 'bold 96pt arial', fill: '#F00'});
+        gameOverLabel = this.game.add.text(this.game.world.centerX, this.game.world.centerY-200, 'Game Over', {font: 'bold 72pt arial', fill: '#F00'});
         gameOverLabel.anchor.set(0.5);
         gameOverLabel.visible = false;
         scoreText = this.game.add.text(0, 0, returnCurrentScore(0), {
-            font: '30px Arial',
+            font: '24pt Arial',
             align: 'center',
             boundsAlignH: 'left',
             boundsAlignV: 'top'
         });
-        scoreText.setTextBounds(50, 30, 150, 0);
+        scoreText.setTextBounds(10, 10, 150, 0);
+
+        repoText = this.game.add.text(this.game.world.centerX, this.game.world.centerY - 125, 'Visited Repositories', {font: 'bold 24pt arial'});
+        repoText.anchor.set(0.5, 0);
+        repoText.visible = false;
 
         // emitters
         jumpEmitter = this.game.add.emitter(this.game.world.centerX, 0);
@@ -173,12 +186,35 @@ module.exports = (function() {
         deathEmitter.makeParticles('heart');
         deathEmitter.gravity = 300;
 
-        this.game.add.button(this.game.world.width - 60, 30, 'diamond', playPauseSound, this);
+        btnVolOff = this.game.add.button(this.game.world.width - 60, 25, 'volumeOff', playPauseSound, this);
+        btnVolOff.scale.set(0.5);
+        btnVolOff.visible = false;
+        btnVolOn = this.game.add.button(this.game.world.width - 60, 25, 'volumeOn', playPauseSound, this);
+        btnVolOn.scale.set(0.5);
 
-        homeButton = this.game.add.button(this.game.world.centerX - 256, this.game.world.centerY, 'home_button', backToMainMenu, this);
-        homeButton.scale.set(0.5);
+        homeButton = this.game.add.button(this.game.world.centerX, 450, 'home_button', backToMainMenu, this);
+        homeButton.width = homeButton.height = 96;
         homeButton.visible = false;
+
+        // Repos visited GUI objects
+        o.addVisitedRepo(level);
     };
+
+    o.addVisitedRepo = function(l) {
+        var i = this.game.add.sprite(this.game.world.centerX-200, this.game.world.centerY - 75 + reposVisitedGUI.length*32, 'repo-avatar' + reposVisitedGUI.length);
+        var t = this.game.add.text(this.game.world.centerX-152, this.game.world.centerY - 75 + reposVisitedGUI.length*32, l.owner + '/' + l.repository, {font: 'normal 16pt arial'});
+
+        i.width = 24;
+        i.height = 24;
+        t.height = 24;
+        t.visible = false;
+        i.visible = false;
+
+        reposVisitedGUI.push({
+            avatar: i,
+            text: t
+        });
+    }
 
     o.createAvatar = function(startPos) {
         var signpost = nonCollisionGroup.create(startPos + 64, this.game.world.height-64, 'signpost');
@@ -189,6 +225,7 @@ module.exports = (function() {
     };
 
     function backToMainMenu() {
+        if ( soundsEnabled ) sndClick.play();
         this.state.start('mainmenu');
     }
 
@@ -217,6 +254,10 @@ module.exports = (function() {
                 this.gameOver();
                 break;
         }
+    };
+
+    o.shutdown = function() {
+        music.stop();
     };
 
     o.generateNextGap = function(i, platforms, runSpeed) {
@@ -347,7 +388,7 @@ module.exports = (function() {
 
     o.run = function() {
         var isJumping = !player.body.touching.down;
-        var runSpeed = 250;
+        var runSpeed = 400;
 
         runSpeed += Math.abs(platforms.getChildAt(0).x) / 64;
 
@@ -373,6 +414,7 @@ module.exports = (function() {
                 levelGenerationIteration = 0;
                 level = levels[++currentLevelIndex];
                 o.createAvatar(previousLevelLength*64);
+                o.addVisitedRepo(level);
             }
         }
 
@@ -388,6 +430,8 @@ module.exports = (function() {
             if ( this.game.physics.arcade.collide(player, monsters, onMonsterCollide) ) {
                 if ( state == 'dead' ) {
                     return;
+                } else {
+                    if (soundsEnabled) sndKillMonster.play()
                 }
             }
         }
@@ -410,6 +454,7 @@ module.exports = (function() {
         }
         if (cursors.down.isDown && player.body.velocity.y > -150 ) {
             player.body.velocity.y = 800;
+            if ( soundsEnabled ) sndDown.play();
         }
 
         if (isJumping) {
@@ -461,21 +506,33 @@ module.exports = (function() {
             scale.y -= 0.05;
             player.scale = scale;
         }
+
+        repoText.visible = true;
+
+        for ( var i = 0; i < Math.min(6, reposVisitedGUI.length); i++ ) {
+            reposVisitedGUI[i].avatar.visible = true;
+            reposVisitedGUI[i].text.visible = true;
+        }
     };
 
     function playPauseSound() {
         if(music.isPlaying) {
             soundsEnabled = false;
             music.pause();
-            startButton.filters = [grayFilter];
+            btnVolOn.visible = false;
+            btnVolOff.visible = true;
+            //startButton.filters = [grayFilter];
         } else {
+            soundsEnabled = true;
             music.play();
-            startButton.filters = null;
+            btnVolOff.visible = false;
+            btnVolOn.visible = true;
+            //startButton.filters = null;
         }
     }
 
     function updateRunnerSpeedTo(speed) {
-        speed = speed < 550 ? speed : 550;
+        //speed = speed < 550 ? speed : 550;
 
         platforms.forEach(function(ground) {
             if(ground.worldPosition.x < -100) {
@@ -512,6 +569,7 @@ module.exports = (function() {
     }
 
     function killPlayer() {
+        if ( soundsEnabled ) sndDie.play();
         state = 'dead';
         updateRunnerSpeedTo(0);
         deathEmitter.x = player.worldPosition.x + player.width / 2;

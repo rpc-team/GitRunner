@@ -13,13 +13,9 @@ module.exports = (function() {
         star: 'assets/star.png',
         signpost: 'assets/avatar.png',
         mainmenu_bkg: 'assets/mm_bg.png',
-        home_button: 'assets/btn_home.png'
-        //btn_crissy_normal: 'assets/mm_c3_off.png',
-        //btn_peter_normal: 'assets/mm_c2_off.png',
-        //btn_ricardo_normal: 'assets/mm_c1_off.png',
-        //btn_crissy_hover: 'assets/mm_c3_on.png',
-        //btn_peter_hover: 'assets/mm_c2_on.png',
-        //btn_ricardo_hover: 'assets/mm_c1_on.png'
+        home_button: 'assets/home.png',
+        volumeOn: 'assets/volume_on.png',
+        volumeOff: 'assets/volume_off.png'
     };
     var _spritesheets = {
         baddie: {
@@ -34,31 +30,31 @@ module.exports = (function() {
         },
         btn_peter: {
             file: 'assets/mm_c2.png',
-            width: 230,
-            height: 230
+            width: 201,
+            height: 229
         },
         btn_crissy: {
             file: 'assets/mm_c3.png',
-            width: 230,
-            height: 230
+            width: 201,
+            height: 229
         },
         btn_ricardo: {
             file: 'assets/mm_c1.png',
-            width: 230,
-            height: 230
+            width: 201,
+            height: 229
         },
         btn_help: {
-            file: 'assets/btn_help.png',
-            width: 240,
-            height: 240
+            file: 'assets/info.png',
+            width: 128,
+            height: 128
         },
         btn_arrow: {
-            file: 'assets/btn_arrow.png',
+            file: 'assets/next.png',
             width: 64,
             height: 64
         },
         btn_close: {
-            file: 'assets/btn_close.png',
+            file: 'assets/close.png',
             width: 64,
             height: 64
         },
@@ -93,6 +89,10 @@ module.exports = (function() {
         this.game.load.audio('jump', 'assets/sounds/jump.ogg');
         this.game.load.audio('drop', 'assets/sounds/drop.ogg');
         this.game.load.audio('drop_end', 'assets/sounds/drop_end.ogg');
+        this.game.load.audio('click', 'assets/sounds/click.ogg');
+        this.game.load.audio('die', 'assets/sounds/die.ogg');
+        this.game.load.audio('down', 'assets/sounds/down.ogg');
+        this.game.load.audio('kill_monster', 'assets/sounds/kill_monster.ogg');
 
         this.game.load.json('server_version', 'http://' + settings.server.host + ':' + settings.server.port + '/version');
     };
