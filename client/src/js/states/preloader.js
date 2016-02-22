@@ -93,6 +93,10 @@ module.exports = (function() {
         this.game.load.audio('jump', 'assets/sounds/jump.ogg');
         this.game.load.audio('drop', 'assets/sounds/drop.ogg');
         this.game.load.audio('drop_end', 'assets/sounds/drop_end.ogg');
+        this.game.load.audio('click', 'assets/sounds/click.ogg');
+        this.game.load.audio('die', 'assets/sounds/die.ogg');
+        this.game.load.audio('down', 'assets/sounds/down.ogg');
+        this.game.load.audio('kill_monster', 'assets/sounds/kill_monster.ogg');
 
         this.game.load.json('server_version', 'http://' + settings.server.host + ':' + settings.server.port + '/version');
     };

@@ -9,6 +9,7 @@ module.exports = (function() {
     //var dude, baddie;
     var characterButtons = {};
     var serverLabel, pickAndPlayLabel;
+    var sndClick;
 
     o.preload = function() {
         console.log('MainMenu.preload');
@@ -20,6 +21,8 @@ module.exports = (function() {
         console.log('MainMenu.create');
 
         var serverVersion = this.game.cache.getJSON('server_version');
+
+        sndClick = this.game.add.audio('click');
 
         this.game.add.sprite(0, 0, 'mainmenu_bkg');
 
@@ -49,6 +52,7 @@ module.exports = (function() {
     };
 
     o.actionOnClick = function(opts) {
+        sndClick.play();
         if(opts.action === 'help') {
             o.displayHelp();
         } else if(opts.action === 'character') {
