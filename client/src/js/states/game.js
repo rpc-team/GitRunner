@@ -4,6 +4,7 @@
 
 module.exports = (function() {
     var settings = require('../../settings');
+    var RestJS = require('rest-js');
     var o = {};
     var assetPath;
     var _tiles = {};
@@ -16,6 +17,12 @@ module.exports = (function() {
     var levelOffset;
 
     var level, levelGenerationIteration = 1;
+
+    var levels = [];
+    var currentLevelIndex = 0;
+    var previousLevelLength = 0;
+    var isLoadingLevel = false;
+
     var numJumps = 0;
     var gameOverLabel;
     var deathEmitter, jumpEmitter;
@@ -31,7 +38,7 @@ module.exports = (function() {
     var next_position = {};
     var empty_gaps = [];
 
-    var COLLIDE_ENABLED = false;
+    var COLLIDE_ENABLED = true;
 
     o.preload = function() {
         console.log('Selected Character: ' + settings.selectedCharacter);
@@ -86,10 +93,13 @@ module.exports = (function() {
         grayFilter = this.game.add.filter('Gray');
 
         level = this.game.cache.getJSON('level');
+        levels[currentLevelIndex] = level;
+        level = levels[currentLevelIndex];
+        isLoadingLevel = false;
 
         var imgData = new Image();
         imgData.src = level.avatar;
-        this.game.cache.addImage('repo-avatar', level.avatar, imgData);
+        this.game.cache.addImage('repo-avatar' + currentLevelIndex, level.avatar, imgData);
 
         var serverVersion = this.game.cache.getJSON('server_version');
 
@@ -108,7 +118,6 @@ module.exports = (function() {
         monsters = this.game.add.group();
         monsters.enableBody = true;
 
-        // level.gaps = 1500;
         levelOffset = Math.floor(256/64);
         level.size += levelOffset;
         var levelSize = 20;
@@ -129,11 +138,7 @@ module.exports = (function() {
         }
 
         // create the avatar image
-        var signpost = nonCollisionGroup.create(64, this.game.world.height-64, 'signpost');
-        signpost.anchor.set(0, 1);
-        var avatar = nonCollisionGroup.create(signpost.x + 18, 245, 'repo-avatar');
-        avatar.width = 200;
-        avatar.height = 165;
+        o.createAvatar(0);
 
         // create the player
         player = this.game.add.sprite(256, 0, 'dude');
@@ -175,6 +180,15 @@ module.exports = (function() {
         homeButton.visible = false;
     };
 
+    o.createAvatar = function(startPos) {
+        console.log('Putting avatar signpost @ ' + (startPos+64));
+        var signpost = nonCollisionGroup.create(startPos + 64, this.game.world.height-64, 'signpost');
+        signpost.anchor.set(0, 1);
+        var avatar = nonCollisionGroup.create(signpost.x + 18, 245, 'repo-avatar' + currentLevelIndex);
+        avatar.width = 200;
+        avatar.height = 165;
+    };
+
     function backToMainMenu() {
         this.state.start('mainmenu');
     }
@@ -208,10 +222,12 @@ module.exports = (function() {
 
     o.generateNextGap = function(i, platforms, runSpeed) {
         var min, max, rnd_position, expected_position, ground;
+        var levelSize = previousLevelLength + level.size - levelOffset;
+        i += previousLevelLength;
 
         runSpeed = runSpeed || 0;
 
-        expected_position = Math.floor((level.size-levelOffset) / level.gaps);
+        expected_position = Math.floor(levelSize / level.gaps);
 
         if(!next_position.gaps) next_position.gaps = expected_position;
 
@@ -249,10 +265,11 @@ module.exports = (function() {
 
     o.generateNextObstacle = function(i, obstacles) {
         var min, max, rnd_position, expected_position, obstacle;
+        var levelSize = previousLevelLength + level.size - levelOffset;
 
         level.obstaclesCreated = level.obstaclesCreated || 0;
         if ( level.obstaclesCreated < level.obstacles ) {
-            expected_position = Math.floor((level.size-levelOffset) / level.obstacles);
+            expected_position = Math.floor((levelSize) / level.obstacles);
 
             if(i/expected_position === Math.floor(i/expected_position) && next_position.obstacles) {
                 if(i === next_position.obstacles) {
@@ -284,10 +301,11 @@ module.exports = (function() {
 
     o.generateNextMonster = function(i, monsters) {
         var min, max, rnd_position, expected_position, monster;
+        var levelSize = previousLevelLength + level.size - levelOffset;
 
         level.monstersCreated = level.monstersCreated || 0;
         if ( level.monstersCreated < level.monsters ) {
-            expected_position = Math.floor((level.size-levelOffset) / level.monsters);
+            expected_position = Math.floor((levelSize) / level.monsters);
 
             if(i/expected_position === Math.floor(i/expected_position) && next_position.monsters) {
                 if(i === next_position.monsters) {
@@ -320,8 +338,6 @@ module.exports = (function() {
     }
 
     function onMonsterCollide(player, monster) {
-        //console.log('Player: ' + JSON.stringify(player.body.touching));
-        //console.log('Monster: ' + JSON.stringify(monster.body.touching));
         if ( (player.body.touching.down || player.body.touching.up) && !player.body.touching.right ) {
             player.body.velocity.y = -500;
             numJumps = 0;
@@ -333,13 +349,14 @@ module.exports = (function() {
 
     o.run = function() {
         var isJumping = !player.body.touching.down;
-        var runSpeed = 250;
+        var runSpeed = 750;
 
         runSpeed += Math.abs(platforms.children[0].x) / 64;
 
         this.lastTime = this.lastTime || this.game.time.now;
 
         if ( this.lastTime >= this.game.time.now ) {
+            //console.log('levelGenerationIteration: ' + levelGenerationIteration + ' | level.size = ' + level.size);
             if ( levelGenerationIteration < level.size ) {
                 if (level.gaps) {
                     o.generateNextGap(levelGenerationIteration, platforms, runSpeed);
@@ -353,6 +370,15 @@ module.exports = (function() {
                     o.generateNextMonster(levelGenerationIteration, monsters);
                 }
                 levelGenerationIteration++;
+            } else {
+                //console.log(currentLevelIndex + ' / ' + (levels.length-1));
+                if ( currentLevelIndex < levels.length-1 ) {
+                    console.log('Generating next levels map: ' + (currentLevelIndex+1));
+                    previousLevelLength += level.size;
+                    levelGenerationIteration = 0;
+                    level = levels[++currentLevelIndex];
+                    o.createAvatar(previousLevelLength*64);
+                }
             }
         }
 
@@ -375,7 +401,8 @@ module.exports = (function() {
             }
         }
 
-        scoreText.setText(returnCurrentScore(0-platforms.children[0].worldPosition.x / 64));
+        var score = Math.round((0-platforms.children[0].worldPosition.x / 64)*100)/100;
+        scoreText.setText(returnCurrentScore(score));
 
         if (cursors.up.isDown || cursors.spacebar.isDown) {
             // enable a single and double jump.
@@ -400,6 +427,38 @@ module.exports = (function() {
             player.animations.play('right');
             numJumps = 0;
         }
+
+        //console.log('Score: ' + score + ', level.size = ' + level.size)
+        if ( score > (previousLevelLength + level.size/2) && !isLoadingLevel ) {
+            if ( currentLevelIndex < levels.length ) {
+                o.fetchNextLevel(level.gameID, settings.playerID)
+            }
+        }
+    };
+
+    o.fetchNextLevel = function(gameID, playerID) {
+        var _this = this;
+        console.log('fetching next level. GameID: ' + gameID + ', playerID: ' + playerID);
+        isLoadingLevel = true;
+
+        var rest = RestJS('http://' + settings.server.host + ':' + settings.server.port, {
+            crossDomain: true,
+            defaultFormat: null
+        });
+
+        rest.get('/game/next/' + gameID + '/' + settings.playerID, function(error, data) {
+            console.log('Loader complete');
+            console.log(data);
+
+            levels[currentLevelIndex+1] = data;
+
+            //_this.game.cache.removeImage('repo-avatar', true);
+            var imgData = new Image();
+            imgData.src = data.avatar;
+            _this.game.cache.addImage('repo-avatar' + (currentLevelIndex+1), data.avatar, imgData);
+
+            isLoadingLevel = false;
+        });
     };
 
     o.gameOver = function() {
@@ -425,7 +484,7 @@ module.exports = (function() {
     }
 
     function updateRunnerSpeedTo(speed) {
-        speed = speed < 550 ? speed : 550;
+        //speed = speed < 550 ? speed : 550;
         platforms.forEach(function(ground) {
             ground.body.velocity.x = -speed;
         }, this);
@@ -446,14 +505,28 @@ module.exports = (function() {
     function killPlayer() {
         state = 'dead';
         updateRunnerSpeedTo(0);
-        deathEmitter.x = player.worldPosition.x + player.width/2;
-        deathEmitter.y = player.worldPosition.y + player.height/2;
+        deathEmitter.x = player.worldPosition.x + player.width / 2;
+        deathEmitter.y = player.worldPosition.y + player.height / 2;
         deathEmitter.start(true, 2000, null, 15);
 
         userName = window.prompt('Enter your name for the leaderboard', userName);
 
-        // TODO: Send end-of-game report to the server
+        var rest = RestJS('http://' + settings.server.host + ':' + settings.server.port, {
+            crossDomain: true,
+            defaultFormat: null
+        });
 
+        var obj = {
+            playerID: settings.playerID,
+            gameID: level.gameID,
+            nickname: userName,
+            score: Math.round((0-platforms.children[0].worldPosition.x / 64)*100)/100
+        };
+
+        console.log('Sending score: ' + JSON.stringify(obj));
+
+        rest.post('/score', obj, function (error, data) {
+        });
     }
 
     function returnCurrentScore(score) {

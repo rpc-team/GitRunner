@@ -29,6 +29,8 @@ app.exposeEndpoints = function() {
     app.get('/game/next/:gameID/:playerID', handlers.nextLevel);
 
     app.post('/score', handlers.score);
+
+    app.get('/leaderboard/:playerID', handlers.leaderboard);
 };
 
 app.initGitHub = function() {

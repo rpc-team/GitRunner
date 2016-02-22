@@ -35,8 +35,8 @@ function getStartLevel(){
     //return ['Odobo', 'odobox'];
 }
 
-function getNextLevel(prevOwner, prevRepo){
-    return ['vert-x3', 'vertx-lang-js'];
+function getNextLevel(prevOwner, prevRepo){    return ['Odobo', 'odobox'];
+    //return ['vert-x3', 'vertx-lang-js'];
 }
 
 function parseGitHubStats(playerID, gameID, owner, repository, res) {
@@ -120,6 +120,8 @@ function parseGitHubStats(playerID, gameID, owner, repository, res) {
                     var data = {
                         playerID: playerID,
                         gameID: gameID,
+                        owner: owner,
+                        repository: repository,
                         size: (Math.floor(maxLangSize / 1024) + allData.repo.subscribers_count) * 5,
                         obstacles: Math.floor(maxLangSize / 1024),
                         monsters: allData.repo.subscribers_count,
@@ -197,6 +199,11 @@ module.exports = function() {
             var gameID = req.params.gameID;
             var level = getNextLevel();  //TODO to be decided if we put here the last level played or we make any connections for them, one option is to randomly select from an array of preset repos
 
+            //if(){
+            //
+            //} else {
+            //
+            //}
             parseGitHubStats(playerID, gameID, level[0], level[1], res);
         },
         score: function(req, res){
@@ -220,8 +227,6 @@ module.exports = function() {
                 return res.status(400).send({ message: 'Bad Request'});
             }
 
-
-
             function checkScore(params, cb){
                 var cursor = db.collection('gameplay').findOne({ "_id" : params.playerID + "_" + params.gameID}, function(err, doc){
                     if(!err && doc) {
@@ -235,6 +240,41 @@ module.exports = function() {
                     }
                 });
             };
+        },
+        leaderboard: function(req, res){
+            var playerID = req.params.playerID;
+
+            var data = {
+                leaderboard: [],
+                player: null
+            };
+
+            db.collection('gameplay').find({"nickname" : {$exists: true}}, {"limit": 5, "sort": [["score", "desc"]]}).toArray(function(err, items) {
+                for (i in items) {
+                    data.leaderboard[i] = {};
+                    data.leaderboard[i].nickname = items[i].nickname;
+                    data.leaderboard[i].score = items[i].score;
+                    data.leaderboard[i].playerID = items[i].playerID;
+                }
+
+                db.collection('gameplay').find({"playerID": playerID}, {"limit": 1, "sort": [["score", "desc"]]}).toArray(function(err, players) {
+                    if(players.length>0){
+                        data.player = {};
+                        data.player.score = players[0].score;
+
+                        console.log("lead: " + JSON.stringify(data.leaderboard))
+                        console.log("player " + JSON.stringify(data.player))
+
+                        //if the player exists in the DB, get  the leaderboard position (count elements with higher score than this players)
+                        db.collection('gameplay').find({ score : { $gt : data.player.score } }).count(function(err, position){
+                            data.player.position = position + 1;
+                            res.send(data);
+                        });
+                    } else {
+                        res.send(data);
+                    }
+                });
+            });
         }
     };
 }();
